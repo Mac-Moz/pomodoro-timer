@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍅 ポモドーロタイマー</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
+  :root {
+    --fd:#1a2e1a;--fm:#2d4a2d;--fl:#3d6b3d;
+    --am:#c8891a;--al:#e8a832;
+    --cr:#f2ede4;--ms:#6b8f6b;
+    --alt:#c84b2a;--dim:#9aad9a;
+    --cb:rgba(45,74,45,0.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',sans-serif;background:var(--fd);color:var(--cr);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:22px 16px 48px;
+    background-image:radial-gradient(ellipse at 20% 0%,rgba(61,107,61,.28) 0%,transparent 60%),
+                     radial-gradient(ellipse at 80% 100%,rgba(107,143,107,.12) 0%,transparent 50%);
+  }
+  h1{font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:18px}
+
+  /* ─── セットアップパネル ─── */
+  .setup-panel{
+    width:100%;max-width:420px;
+    background:rgba(30,50,30,0.8);
+    border:1px solid var(--fl);border-radius:12px;
+    padding:20px;margin-bottom:20px;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .setup-panel.hidden{display:none}
+  .setup-title{font-size:13px;font-weight:600;color:var(--al);display:flex;align-items:center;gap:6px}
+  .setup-steps{font-size:12px;color:var(--dim);line-height:1.9;padding-left:4px}
+  .setup-steps a{color:var(--al);text-decoration:none}
+  .setup-steps a:hover{text-decoration:underline}
+  .setup-input-row{display:flex;gap:8px;align-items:center}
+  .setup-input-row input{
+    flex:1;background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--cr);font-family:'Inter',sans-serif;font-size:12px;
+    padding:9px 12px;outline:none;
+  }
+  .setup-input-row input:focus{border-color:var(--am)}
+  .setup-input-row input::placeholder{color:var(--dim);font-size:11px}
+  .btn-setup{
+    background:var(--am);color:var(--fd);border:none;border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+    padding:9px 16px;cursor:pointer;white-space:nowrap;transition:background .16s;
+  }
+  .btn-setup:hover{background:var(--al)}
+
+  /* auth status */
+  .auth-status{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;padding:8px 12px;border-radius:8px;
+    background:rgba(107,143,107,0.1);border:1px solid var(--fl);
+  }
+  .auth-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);flex-shrink:0}
+  .auth-dot.ok{background:#5cb85c}
+  .auth-dot.fail{background:var(--alt)}
+  .btn-auth{
+    margin-left:auto;background:var(--cb);border:1px solid var(--fl);
+    border-radius:6px;color:var(--cr);font-family:'Inter',sans-serif;
+    font-size:11px;padding:5px 10px;cursor:pointer;transition:background .16s;white-space:nowrap;
+  }
+  .btn-auth:hover{background:var(--fm)}
+
+  /* ─── BGM ─── */
+  .bgm-row{width:100%;max-width:380px;display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .bgm-label{font-size:11px;letter-spacing:.1em;color:var(--dim);white-space:nowrap}
+  .bgm-sel{
+    flex:1;background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--cr);font-family:'Inter',sans-serif;font-size:13px;
+    padding:8px 12px;outline:none;cursor:pointer;appearance:none;
+  }
+  .btn-bgm{
+    background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--dim);width:42px;height:36px;font-size:16px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;flex-shrink:0;
+  }
+  .btn-bgm.on{color:var(--al);border-color:var(--am)}
+  .btn-bgm:hover{background:var(--fm)}
+
+  /* ─── タスク行 ─── */
+  .task-row{width:100%;max-width:380px;display:flex;gap:8px;margin-bottom:24px}
+  select,input[type=text]{
+    flex:1;background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--cr);font-family:'Inter',sans-serif;font-size:14px;
+    padding:10px 14px;outline:none;cursor:pointer;appearance:none;
+  }
+  select:focus,input[type=text]:focus{border-color:var(--am)}
+  .btn-xs{
+    background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--al);font-size:18px;width:42px;flex-shrink:0;cursor:pointer;transition:background .18s;
+  }
+  .btn-xs:hover{background:var(--fm)}
+
+  /* ─── リング ─── */
+  .tw{position:relative;width:220px;height:220px;margin-bottom:24px}
+  .tw svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .rb{fill:none;stroke:var(--fm);stroke-width:6}
+  #rp{fill:none;stroke:var(--ms);stroke-width:6;stroke-linecap:round;
+      transition:stroke-dashoffset 1s linear,stroke .5s;
+      filter:drop-shadow(0 0 7px var(--ms))}
+  .ti{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+  #td{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:700;
+      letter-spacing:-2px;color:var(--cr);line-height:1;transition:color .5s}
+  #pl{font-size:10px;color:var(--dim);letter-spacing:.18em;text-transform:uppercase}
+  .pips{display:flex;gap:6px;margin-top:8px}
+  .pip{width:7px;height:7px;border-radius:50%;background:var(--fl);transition:background .4s}
+  .pip.done{background:var(--am)}
+
+  /* ─── コントロール ─── */
+  .ctrl{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;justify-content:center}
+  .btn{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+    letter-spacing:.04em;border:none;border-radius:8px;cursor:pointer;
+    padding:10px 18px;transition:all .16s;
+  }
+  .btn-pri{background:var(--am);color:var(--fd);min-width:112px}
+  .btn-pri:hover{background:var(--al)}
+  .btn-gh{background:var(--cb);border:1px solid var(--fl);color:var(--cr)}
+  .btn-gh:hover{background:var(--fm)}
+  .btn-end{background:rgba(200,75,42,.15);border:1px solid var(--alt);color:#f07050;display:none}
+  .btn-end:hover{background:rgba(200,75,42,.3)}
+  .btn-end.show{display:inline-flex;align-items:center;gap:5px}
+
+  #sb{font-size:12px;color:var(--dim);margin-bottom:18px;min-height:18px;
+      max-width:380px;text-align:center;transition:color .3s}
+  #sb.alert{color:var(--alt)}
+  #sb.ok{color:var(--al)}
+
+  hr{width:100%;max-width:380px;border:none;border-top:1px solid var(--fm);margin-bottom:14px}
+  .rt{width:100%;max-width:380px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+  #rl{width:100%;max-width:380px;display:flex;flex-direction:column;gap:7px}
+
+  .ri{
+    background:var(--cb);border:1px solid var(--fm);border-radius:8px;
+    padding:9px 14px;display:flex;align-items:center;gap:10px;
+    animation:si .3s ease;
+  }
+  .ri.partial{border-color:rgba(200,137,26,.4)}
+  @keyframes si{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+  .rd{width:7px;height:7px;border-radius:50%;background:var(--am);flex-shrink:0}
+  .rd.p{background:#6b9faf}
+  .rn{font-size:13px;font-weight:500;flex:1}
+  .rtm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);text-align:right}
+  .ric{font-size:13px;flex-shrink:0}
+  .sp{display:inline-block;width:11px;height:11px;border:2px solid var(--dim);
+      border-top-color:var(--al);border-radius:50%;animation:spin .75s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty{text-align:center;color:var(--dim);font-size:13px;padding:16px 0}
+
+  /* ─── モーダル ─── */
+  .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+       z-index:200;align-items:center;justify-content:center}
+  .mbg.open{display:flex}
+  .mo{background:var(--fm);border:1px solid var(--fl);border-radius:12px;
+      padding:22px;width:300px;display:flex;flex-direction:column;gap:12px}
+  .mo h3{font-size:14px;font-weight:600}
+  .mbt{display:flex;gap:8px;justify-content:flex-end}
+  .bsm{font-size:13px;padding:8px 16px;min-width:auto}
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .pulsing{animation:pulse .75s ease-in-out infinite}
+</style>
+</head>
+<body>
+<h1>🍅 Pomodoro Timer</h1>
+
+<!-- セットアップパネル -->
+<div class="setup-panel" id="setupPanel">
+  <div class="setup-title">🔧 初回設定：Google Calendar 連携</div>
+  <div class="setup-steps">
+    <b>1.</b> <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a> を開く<br>
+    <b>2.</b> プロジェクト作成 → 「APIとサービス」→「ライブラリ」→ <b>Google Calendar API</b> を有効化<br>
+    <b>3.</b> 「認証情報」→「認証情報を作成」→ <b>OAuthクライアントID</b><br>
+    &nbsp;&nbsp;&nbsp;種類：<b>ウェブアプリケーション</b><br>
+    &nbsp;&nbsp;&nbsp;承認済みJavaScript生成元：<code>https://claude.ai</code> を追加<br>
+    <b>4.</b> 作成された <b>クライアントID</b> を下に貼り付けてください
+  </div>
+  <div class="setup-input-row">
+    <input type="text" id="clientIdInput" placeholder="xxxxxxxx.apps.googleusercontent.com">
+    <button class="btn-setup" id="btnSaveClientId">保存</button>
+  </div>
+</div>
+
+<!-- 認証状態バー -->
+<div class="auth-status" id="authStatus" style="width:100%;max-width:380px;margin-bottom:14px">
+  <div class="auth-dot" id="authDot"></div>
+  <span id="authLabel">未認証 — Google アカウントでログインしてください</span>
+  <button class="btn-auth" id="btnAuth">ログイン</button>
+</div>
+
+<!-- BGM 選択 -->
+<div class="bgm-row">
+  <span class="bgm-label">BGM</span>
+  <select class="bgm-sel" id="bgmSel">
+    <option value="ambient">🌧 アンビエント・雨音</option>
+    <option value="classic">🎻 クラシック風（弦楽）</option>
+    <option value="piano">🎹 ピアノ・チル</option>
+    <option value="white">〰 ホワイトノイズ</option>
+    <option value="brown">🌊 ブラウンノイズ（波音）</option>
+    <option value="none">🔇 BGMなし</option>
+  </select>
+  <button class="btn-bgm" id="btnBgm">🎵</button>
+</div>
+
+<!-- タスク -->
+<div class="task-row">
+  <select id="taskSel">
+    <option>経理作業</option><option>請求書確認</option>
+    <option>メール対応</option><option>資料作成</option><option>その他</option>
+  </select>
+  <button class="btn-xs" id="btnAdd">＋</button>
+</div>
+
+<!-- リング -->
+<div class="tw">
+  <svg viewBox="0 0 220 220">
+    <circle class="rb" cx="110" cy="110" r="98"/>
+    <circle id="rp" cx="110" cy="110" r="98" stroke-dasharray="616" stroke-dashoffset="0"/>
+  </svg>
+  <div class="ti">
+    <div id="td">25:00</div>
+    <div id="pl">作業中</div>
+    <div class="pips">
+      <div class="pip" id="p0"></div><div class="pip" id="p1"></div>
+      <div class="pip" id="p2"></div><div class="pip" id="p3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ボタン -->
+<div class="ctrl">
+  <button class="btn btn-gh" id="btnReset">リセット</button>
+  <button class="btn btn-pri" id="btnStart">▶ スタート</button>
+  <button class="btn btn-end" id="btnEnd">⏹ ここで終了・記録</button>
+</div>
+
+<div id="sb">タスクを選んでスタートしてください</div>
+<hr>
+<div class="rt">本日の記録</div>
+<div id="rl"><div class="empty">完了したセッションがここに表示されます</div></div>
+
+<!-- タスク追加モーダル -->
+<div class="mbg" id="modal">
+  <div class="mo">
+    <h3>タスクを追加</h3>
+    <input type="text" id="nti" placeholder="タスク名..." maxlength="30">
+    <div class="mbt">
+      <button class="btn btn-gh bsm" id="btnCan">キャンセル</button>
+      <button class="btn btn-pri bsm" id="btnCon">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+
+<script>
+// ══════════════════════════════════════════
+//  定数・状態
+// ══════════════════════════════════════════
+const CIRC=2*Math.PI*98, WORK=25*60, BREAK=5*60, CD=30;
+const SCOPES='https://www.googleapis.com/auth/calendar.events';
+const CAL_BASE='https://www.googleapis.com/calendar/v3';
+
+let s={
+  phase:'work',rem:WORK,running:false,done:0,
+  bgmOn:false,cdActive:false,tid:null,sessionStart:null
+};
+let actx=null,bgmGain=null,bgmNodes=[],cdInt=null;
+let gToken=null; // Google OAuth アクセストークン
+let clientId=localStorage.getItem('gcal_client_id')||'';
+
+// ══════════════════════════════════════════
+//  DOM
+// ══════════════════════════════════════════
+const td=document.getElementById('td'),pl=document.getElementById('pl'),
+      rp=document.getElementById('rp'),
+      btnStart=document.getElementById('btnStart'),
+      btnReset=document.getElementById('btnReset'),
+      btnEnd=document.getElementById('btnEnd'),
+      btnBgm=document.getElementById('btnBgm'),
+      bgmSel=document.getElementById('bgmSel'),
+      sb=document.getElementById('sb'),
+      rl=document.getElementById('rl'),
+      taskSel=document.getElementById('taskSel'),
+      btnAdd=document.getElementById('btnAdd'),
+      modal=document.getElementById('modal'),
+      nti=document.getElementById('nti'),
+      btnCan=document.getElementById('btnCan'),
+      btnCon=document.getElementById('btnCon'),
+      setupPanel=document.getElementById('setupPanel'),
+      clientIdInput=document.getElementById('clientIdInput'),
+      btnSaveClientId=document.getElementById('btnSaveClientId'),
+      authStatus=document.getElementById('authStatus'),
+      authDot=document.getElementById('authDot'),
+      authLabel=document.getElementById('authLabel'),
+      btnAuth=document.getElementById('btnAuth');
+
+rp.style.strokeDasharray=CIRC;
+
+// ══════════════════════════════════════════
+//  セットアップ・認証
+// ══════════════════════════════════════════
+function init(){
+  if(clientId){
+    clientIdInput.value=clientId;
+    setupPanel.classList.add('hidden');
+    updateAuthUI();
+  }
+}
+
+btnSaveClientId.addEventListener('click',()=>{
+  const v=clientIdInput.value.trim();
+  if(!v||!v.includes('.apps.googleusercontent.com')){
+    alert('有効なクライアントIDを入力してください\n（例: xxxxxx.apps.googleusercontent.com）');
+    return;
+  }
+  clientId=v;
+  localStorage.setItem('gcal_client_id',v);
+  setupPanel.classList.add('hidden');
+  updateAuthUI();
+});
+
+function updateAuthUI(){
+  if(!clientId){
+    authDot.className='auth-dot';
+    authLabel.textContent='クライアントIDを設定してください';
+    btnAuth.textContent='設定する';
+    btnAuth.onclick=()=>setupPanel.classList.remove('hidden');
+    return;
+  }
+  if(gToken){
+    authDot.className='auth-dot ok';
+    authLabel.textContent='Google カレンダーに接続済み';
+    btnAuth.textContent='再認証';
+    btnAuth.onclick=doAuth;
+  } else {
+    authDot.className='auth-dot fail';
+    authLabel.textContent='未認証 — ログインしてカレンダーに接続';
+    btnAuth.textContent='ログイン';
+    btnAuth.onclick=doAuth;
+  }
+}
+
+function doAuth(){
+  if(!clientId){
+    setupPanel.classList.remove('hidden');
+    return;
+  }
+  // Google Identity Services — Token モデル
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:clientId,
+    scope:SCOPES,
+    callback:(resp)=>{
+      if(resp.error){
+        setSt('認証に失敗しました: '+resp.error,'alert');
+        gToken=null;
+      } else {
+        gToken=resp.access_token;
+        // トークン有効期限に合わせてクリア（通常1時間）
+        setTimeout(()=>{gToken=null;updateAuthUI();},3500*1000);
+        setSt('✅ Google カレンダーに接続しました','ok');
+      }
+      updateAuthUI();
+    }
+  });
+  client.requestAccessToken();
+}
+
+// ══════════════════════════════════════════
+//  Google Calendar API 直接呼び出し
+// ══════════════════════════════════════════
+async function registerCal(task,start,end,partial){
+  const recId=`r_${start.getTime()}`;
+
+  if(!gToken){
+    setSt('⚠️ Google 認証が必要です。右上の「ログイン」を押してください','alert');
+    setRecIcon(recId,'⚠️');
+    return;
+  }
+
+  const title=partial?`🍅⏹ ${task}（途中終了）`:`🍅 ${task}`;
+  const elapsed=Math.round((end-start)/1000);
+  const desc=partial
+    ?`ポモドーロタイマー：途中終了\n経過時間: ${fmt(elapsed)}`
+    :`ポモドーロタイマー：25分セッション完了`;
+
+  const p=n=>String(n).padStart(2,'0');
+  // Google Calendar API はタイムゾーン付きのISO8601を推奨
+  const toISO=d=>{
+    const off=-d.getTimezoneOffset();
+    const sign=off>=0?'+':'-';
+    const hh=p(Math.floor(Math.abs(off)/60)),mm=p(Math.abs(off)%60);
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${sign}${hh}:${mm}`;
+  };
+
+  const body={
+    summary:title,
+    description:desc,
+    start:{dateTime:toISO(start),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
+    end:  {dateTime:toISO(end),  timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
+  };
+
+  try{
+    const res=await fetch(`${CAL_BASE}/calendars/primary/events`,{
+      method:'POST',
+      headers:{
+        'Authorization':`Bearer ${gToken}`,
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify(body)
+    });
+    if(res.status===401){
+      gToken=null; updateAuthUI();
+      setSt('⚠️ 認証が切れました。再ログインしてください','alert');
+      setRecIcon(recId,'⚠️');
+      return;
+    }
+    const data=await res.json();
+    if(data.id){
+      setRecIcon(recId,'📅');
+      setSt(`✅ "${task}" をカレンダーに登録しました`,'ok');
+    } else {
+      setRecIcon(recId,'⚠️');
+      setSt('カレンダー登録に失敗しました（'+( data.error?.message||'不明')+')','alert');
+    }
+  }catch(e){
+    setRecIcon(recId,'⚠️');
+    setSt('カレンダー登録エラー: '+e.message,'alert');
+  }
+}
+
+// ══════════════════════════════════════════
+//  Audio
+// ══════════════════════════════════════════
+function initAudio(){if(actx)return;actx=new(window.AudioContext||window.webkitAudioContext)()}
+
+function makeNoise(color){
+  const sr=actx.sampleRate,len=sr*4;
+  const buf=actx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+  if(color==='white'){for(let i=0;i<len;i++)d[i]=Math.random()*2-1}
+  else{let l=0;for(let i=0;i<len;i++){const w=(Math.random()*2-1)*0.02;l=(l+w)*.998;d[i]=l*12}}
+  const src=actx.createBufferSource();src.buffer=buf;src.loop=true;return src;
+}
+
+function startBgm(){
+  if(!actx||bgmNodes.length)return;
+  const type=bgmSel.value;if(type==='none')return;
+  bgmGain=actx.createGain();
+  bgmGain.gain.setValueAtTime(0,actx.currentTime);
+  bgmGain.gain.linearRampToValueAtTime(0.15,actx.currentTime+3);
+  bgmGain.connect(actx.destination);
+
+  if(type==='ambient'){
+    const src=makeNoise('white');
+    const bpf=actx.createBiquadFilter();bpf.type='bandpass';bpf.frequency.value=700;bpf.Q.value=0.6;
+    const lpf=actx.createBiquadFilter();lpf.type='lowpass';lpf.frequency.value=2800;
+    src.connect(bpf);bpf.connect(lpf);lpf.connect(bgmGain);src.start();bgmNodes.push(src);
+    const dg=actx.createGain();dg.gain.value=0.035;dg.connect(bgmGain);
+    [55,82,110].forEach((f,i)=>{
+      const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+      const lfo=actx.createOscillator();lfo.frequency.value=0.04+i*0.02;
+      const lg=actx.createGain();lg.gain.value=1.5;
+      lfo.connect(lg);lg.connect(o.frequency);o.connect(dg);
+      o.start();lfo.start();bgmNodes.push(o,lfo);
+    });
+  } else if(type==='classic'){
+    const notes=[196,246.94,293.66,329.63,392];
+    notes.forEach((freq,i)=>{
+      const g=actx.createGain();g.gain.value=0.025;g.connect(bgmGain);
+      const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=freq;
+      const lfo=actx.createOscillator();lfo.frequency.value=5.5+i*0.3;
+      const lg=actx.createGain();lg.gain.value=2.5;
+      lfo.connect(lg);lg.connect(o.frequency);
+      const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;
+      o.connect(lp);lp.connect(g);o.start(actx.currentTime+i*0.3);lfo.start();
+      bgmNodes.push(o,lfo);
+    });
+  } else if(type==='piano'){
+    const scale=[261.63,329.63,392,523.25];
+    let t=actx.currentTime;
+    function chord(){
+      scale.forEach((f,i)=>{
+        const o=actx.createOscillator(),g=actx.createGain();
+        o.connect(g);g.connect(bgmGain);o.type='triangle';o.frequency.value=f;
+        const at=t+i*0.05;
+        g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.04,at+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001,at+3.5);
+        o.start(at);o.stop(at+3.6);
+      });t+=8;
+    }
+    chord();chord();
+    const pid=setInterval(()=>{if(!bgmGain){clearInterval(pid);return}chord();},8000);
+    bgmNodes.push({stop:()=>clearInterval(pid)});
+  } else if(type==='white'){
+    const src=makeNoise('white');
+    const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=6000;
+    src.connect(lp);lp.connect(bgmGain);src.start();bgmNodes.push(src);
+  } else if(type==='brown'){
+    const src=makeNoise('brown');
+    const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;
+    const lfo=actx.createOscillator();lfo.frequency.value=0.12;
+    const lg=actx.createGain();lg.gain.value=0.06;
+    lfo.connect(lg);lg.connect(bgmGain.gain);
+    src.connect(lp);lp.connect(bgmGain);src.start();lfo.start();bgmNodes.push(src,lfo);
+  }
+}
+
+function fadeBgm(sec=5){
+  if(!bgmGain)return;
+  bgmGain.gain.setValueAtTime(bgmGain.gain.value,actx.currentTime);
+  bgmGain.gain.linearRampToValueAtTime(0,actx.currentTime+sec);
+}
+function stopBgm(fade=1){
+  if(!bgmNodes.length)return;
+  fadeBgm(fade);
+  const nodes=[...bgmNodes];bgmNodes=[];bgmGain=null;
+  setTimeout(()=>nodes.forEach(n=>{try{n.stop()}catch(e){}}),(fade+0.2)*1000);
+}
+
+function beep(freq,dur,delay=0,vol=0.26){
+  if(!actx)return;
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.connect(g);g.connect(actx.destination);o.type='sine';o.frequency.value=freq;
+  const t=actx.currentTime+delay;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);
+  g.gain.setValueAtTime(vol,t+dur-0.02);g.gain.linearRampToValueAtTime(0,t+dur);
+  o.start(t);o.stop(t+dur+0.05);
+}
+function playEnd(){beep(523,.25,0,.34);beep(659,.25,.3,.34);beep(784,.45,.6,.36)}
+function playStart(){beep(440,.14,0,.26);beep(523,.18,.18,.26)}
+function playPartial(){beep(440,.2,0,.28);beep(440,.2,.3,.28)}
+function startCdBeeps(){if(cdInt)return;cdInt=setInterval(()=>beep(880,.08,0,.17),1000)}
+function stopCdBeeps(){clearInterval(cdInt);cdInt=null}
+
+// ══════════════════════════════════════════
+//  表示
+// ══════════════════════════════════════════
+function fmt(sec){return`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`}
+
+function updateRing(){
+  const total=s.phase==='work'?WORK:BREAK;
+  rp.style.strokeDashoffset=CIRC*(1-s.rem/total);
+  if(s.rem<=CD&&s.phase==='work'){
+    rp.style.stroke='#c84b2a';rp.style.filter='drop-shadow(0 0 9px #c84b2a)';td.style.color='#f07050';
+  } else {
+    rp.style.stroke='#6b8f6b';rp.style.filter='drop-shadow(0 0 7px #6b8f6b)';td.style.color='var(--cr)';
+  }
+}
+function updatePips(){for(let i=0;i<4;i++)document.getElementById(`p${i}`).classList.toggle('done',i<s.done%4)}
+function setSt(msg,cls=''){sb.textContent=msg;sb.className=cls}
+function showEndBtn(v){btnEnd.classList.toggle('show',v)}
+
+// ══════════════════════════════════════════
+//  タイマーコア
+// ══════════════════════════════════════════
+function tick(){
+  s.rem--;td.textContent=fmt(s.rem);updateRing();
+  if(s.rem===CD&&!s.cdActive){
+    s.cdActive=true;
+    if(s.phase==='work'){fadeBgm(5);setSt('まもなく終了します...','alert');td.classList.add('pulsing')}
+    else setSt('次のセッションがもうすぐ始まります','alert');
+    startCdBeeps();
+  }
+  if(s.rem>0)return;
+
+  stopCdBeeps();td.classList.remove('pulsing');
+  clearInterval(s.tid);s.running=false;showEndBtn(false);
+
+  if(s.phase==='work'){
+    playEnd();s.done++;updatePips();
+    const endT=new Date(),startT=new Date(endT-WORK*1000);
+    addRec(taskSel.value,startT,endT,false);
+    setSt('セッション完了！カレンダーに登録中...','ok');
+    registerCal(taskSel.value,startT,endT,false);
+    s.phase='break';s.rem=BREAK;s.cdActive=false;
+    pl.textContent='休憩中';td.textContent=fmt(BREAK);updateRing();btnStart.textContent='▶ 休憩開始';
+  } else {
+    playStart();
+    s.phase='work';s.rem=WORK;s.cdActive=false;s.sessionStart=null;
+    pl.textContent='作業中';td.textContent=fmt(WORK);updateRing();btnStart.textContent='▶ スタート';
+    setSt('休憩終了。次のセッションを始めましょう！');
+    if(s.bgmOn)startBgm();
+  }
+}
+
+// ══════════════════════════════════════════
+//  途中終了
+// ══════════════════════════════════════════
+function endPartial(){
+  if(!s.sessionStart)return;
+  clearInterval(s.tid);s.running=false;
+  stopCdBeeps();td.classList.remove('pulsing');stopBgm(.5);showEndBtn(false);
+  playPartial();
+  const endT=new Date(),elapsed=WORK-s.rem,startT=new Date(endT-elapsed*1000);
+  addRec(taskSel.value,startT,endT,true);
+  setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');
+  registerCal(taskSel.value,startT,endT,true);
+  Object.assign(s,{phase:'work',rem:WORK,running:false,cdActive:false,tid:null,sessionStart:null});
+  td.textContent=fmt(WORK);td.style.color='var(--cr)';
+  rp.style.stroke='#6b8f6b';rp.style.filter='drop-shadow(0 0 7px #6b8f6b)';rp.style.strokeDashoffset=0;
+  pl.textContent='作業中';btnStart.textContent='▶ スタート';
+}
+
+// ══════════════════════════════════════════
+//  記録
+// ══════════════════════════════════════════
+function addRec(name,start,end,partial){
+  const emp=rl.querySelector('.empty');if(emp)emp.remove();
+  const p=n=>String(n).padStart(2,'0');
+  const ft=d=>`${p(d.getHours())}:${p(d.getMinutes())}`;
+  const elapsed=Math.round((end-start)/1000);
+  const id=`r_${start.getTime()}`;
+  const el=document.createElement('div');
+  el.className='ri'+(partial?' partial':'');
+  el.innerHTML=`
+    <div class="rd${partial?' p':''}"></div>
+    <div class="rn">${name}${partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
+    <div class="rtm">${ft(start)}–${ft(end)}<br><span style="font-size:10px">${fmt(elapsed)}</span></div>
+    <div class="ric" id="${id}"><span class="sp"></span></div>`;
+  rl.prepend(el);
+}
+function setRecIcon(id,icon){const e=document.getElementById(id);if(e)e.innerHTML=icon}
+
+// ══════════════════════════════════════════
+//  ボタンイベント
+// ══════════════════════════════════════════
+btnStart.addEventListener('click',()=>{
+  initAudio();
+  if(s.running){
+    s.running=false;clearInterval(s.tid);stopCdBeeps();
+    btnStart.textContent='▶ 再開';setSt('一時停止中');
+    if(s.phase==='work'&&s.sessionStart)showEndBtn(true);
+  } else {
+    s.running=true;s.tid=setInterval(tick,1000);
+    btnStart.textContent='⏸ 一時停止';showEndBtn(false);
+    if(s.phase==='work'){
+      if(!s.sessionStart)s.sessionStart=new Date();
+      pl.textContent='作業中';setSt(`${taskSel.value} を開始しました`);
+      if(s.bgmOn&&s.rem>CD)startBgm();
+    } else {
+      pl.textContent='休憩中';setSt('休憩中...');stopBgm(2);
+    }
+  }
+});
+
+btnReset.addEventListener('click',()=>{
+  clearInterval(s.tid);stopCdBeeps();stopBgm(.5);showEndBtn(false);
+  Object.assign(s,{phase:'work',rem:WORK,running:false,cdActive:false,tid:null,sessionStart:null});
+  td.textContent=fmt(WORK);td.classList.remove('pulsing');td.style.color='var(--cr)';
+  pl.textContent='作業中';
+  rp.style.stroke='#6b8f6b';rp.style.filter='drop-shadow(0 0 7px #6b8f6b)';rp.style.strokeDashoffset=0;
+  btnStart.textContent='▶ スタート';setSt('リセットしました');
+});
+
+btnEnd.addEventListener('click',()=>{
+  if(confirm(`「${taskSel.value}」の作業を途中終了してカレンダーに記録しますか？`))endPartial();
+});
+
+btnBgm.addEventListener('click',()=>{
+  initAudio();s.bgmOn=!s.bgmOn;btnBgm.classList.toggle('on',s.bgmOn);
+  if(s.bgmOn){
+    if(s.running&&s.phase==='work'&&s.rem>CD)startBgm();
+    const labels={ambient:'雨音',classic:'クラシック風',piano:'ピアノ',white:'ホワイトノイズ',brown:'波音',none:'なし'};
+    setSt(`BGM ON：${labels[bgmSel.value]||bgmSel.value}`);
+  } else {stopBgm();setSt('BGM: OFF')}
+});
+
+bgmSel.addEventListener('change',()=>{
+  if(s.bgmOn&&bgmNodes.length){
+    stopBgm(.5);setTimeout(()=>{if(s.bgmOn&&s.running&&s.phase==='work'&&s.rem>CD)startBgm();},600);
+  }
+});
+
+btnAdd.addEventListener('click',()=>{nti.value='';modal.classList.add('open');setTimeout(()=>nti.focus(),80)});
+btnCan.addEventListener('click',()=>modal.classList.remove('open'));
+btnCon.addEventListener('click',()=>{
+  const v=nti.value.trim();if(!v)return;
+  const opt=document.createElement('option');opt.value=opt.textContent=v;
+  taskSel.appendChild(opt);taskSel.value=v;modal.classList.remove('open');
+});
+nti.addEventListener('keydown',e=>{if(e.key==='Enter')btnCon.click();if(e.key==='Escape')btnCan.click()});
+
+// 初期化
+init();
+</script>
+</body>
+</html>
