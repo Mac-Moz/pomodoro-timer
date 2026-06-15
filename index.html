@@ -351,7 +351,7 @@
 
 <!-- カスタムURL入力 -->
 <div class="bgm-url-area hidden" id="bgmUrlArea">
-  <input type="text" id="bgmUrlInput" class="bgm-url-input" placeholder="MP3 / OGG の直リンクを貼り付け...">
+  <input type="text" id="bgmUrlInput" class="bgm-url-input" placeholder="MP3 / OGG の直リンクを貼り付け（YouTube不可）">
   <button class="btn-preview" id="btnPreview">▶ 試聴</button>
 </div>
 <div class="bgm-sites hidden" id="bgmSites">
@@ -905,7 +905,6 @@ function startBgm(){
     const url=bgmUrlInput.value.trim()||localStorage.getItem(BGM_URL_KEY)||'';
     if(!url){setSt('カスタムURLを入力してください','alert');s.bgmOn=false;btnBgm.classList.remove('on');return;}
     audioEl=new Audio();
-    audioEl.crossOrigin='anonymous';
     audioEl.loop=true;
     audioEl.volume=vol/100;
     audioEl.src=url;
@@ -913,7 +912,7 @@ function startBgm(){
       .then(()=>setSt('BGM ON：カスタムURL','ok'))
       .catch(()=>{
         audioEl=null;
-        setSt('再生できませんでした（CORS制限またはURL不正）','alert');
+        setSt('再生できませんでした（URLが無効か非対応形式です）','alert');
         s.bgmOn=false;btnBgm.classList.remove('on');
       });
     return;
@@ -975,7 +974,7 @@ function startBgm(){
       [174.61,261.63,349.23,440],  // F major
       [196,246.94,392,493.88],     // G major
     ];
-    let t=actx.currentTime;
+    let t=actx.currentTime+0.1;
     let ci=0;
     function playChord(){
       if(!bgmGain)return;
@@ -997,8 +996,13 @@ function startBgm(){
       bass.start(t);bass.stop(t+7.1);
       t+=8;
     }
-    playChord();playChord();
-    const pid=setInterval(()=>{if(!bgmGain){clearInterval(pid);return;}playChord();},8000);
+    // lookahead scheduler: 常に16秒先までコードを確保する
+    function schedulePiano(){
+      if(!bgmGain)return;
+      while(t<actx.currentTime+16)playChord();
+    }
+    schedulePiano();
+    const pid=setInterval(schedulePiano,4000);
     bgmNodes.push({stop:()=>clearInterval(pid)});
 
   } else if(type==='lofi'){
@@ -1018,7 +1022,7 @@ function startBgm(){
     // Lo-Fi ローパスフィルター（こもった音）
     const lofi=actx.createBiquadFilter();lofi.type='lowpass';lofi.frequency.value=2200;lofi.Q.value=0.5;
     lofi.connect(bgmGain);
-    let t2=actx.currentTime;let ci2=0;
+    let t2=actx.currentTime+0.1;let ci2=0;
     function playLofi(){
       if(!bgmGain)return;
       const freqs=LOFI_CHORDS[ci2%4];ci2++;
@@ -1034,8 +1038,13 @@ function startBgm(){
       });
       t2+=6;
     }
-    playLofi();playLofi();
-    const pid2=setInterval(()=>{if(!bgmGain){clearInterval(pid2);return;}playLofi();},6000);
+    // lookahead scheduler: 常に12秒先までコードを確保する
+    function scheduleLofi(){
+      if(!bgmGain)return;
+      while(t2<actx.currentTime+12)playLofi();
+    }
+    scheduleLofi();
+    const pid2=setInterval(scheduleLofi,3000);
     bgmNodes.push({stop:()=>clearInterval(pid2)});
 
   } else if(type==='white'){
@@ -1046,19 +1055,22 @@ function startBgm(){
   } else if(type==='brown'){
     const src=makeNoise('brown');
     const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;
+    // bgmGain の前段に waveG を置き、LFO はそこだけに掛ける（フェード処理に干渉しない）
+    const waveG=actx.createGain();waveG.gain.value=0.85;waveG.connect(bgmGain);
     const lfo=actx.createOscillator();lfo.frequency.value=0.12;
-    const lg=actx.createGain();lg.gain.value=0.06;
-    lfo.connect(lg);lg.connect(bgmGain.gain);
-    src.connect(lp);lp.connect(bgmGain);src.start();lfo.start();bgmNodes.push(src,lfo);
+    const lg=actx.createGain();lg.gain.value=0.15;
+    lfo.connect(lg);lg.connect(waveG.gain);
+    src.connect(lp);lp.connect(waveG);src.start();lfo.start();bgmNodes.push(src,lfo);
   }
 }
 
-function fadeBgm(sec=5){
-  if(audioEl){
-    const startVol=audioEl.volume,steps=sec*10;let step=0;
+function fadeBgm(sec=5,elOverride=null){
+  const target=elOverride||audioEl;
+  if(target){
+    const startVol=target.volume,steps=sec*10;let step=0;
     const iv=setInterval(()=>{
-      step++;if(!audioEl){clearInterval(iv);return;}
-      audioEl.volume=Math.max(0,startVol*(1-step/steps));
+      step++;
+      target.volume=Math.max(0,startVol*(1-step/steps));
       if(step>=steps)clearInterval(iv);
     },100);
     return;
@@ -1071,8 +1083,8 @@ function fadeBgm(sec=5){
 function stopBgm(fade=1){
   if(audioEl){
     if(fade>0){
-      fadeBgm(fade);
-      const el=audioEl;audioEl=null;
+      const el=audioEl;audioEl=null;  // 先にnull→isBgmActive()=false、フェードはelで継続
+      fadeBgm(fade,el);
       setTimeout(()=>{try{el.pause();el.src='';}catch(e){}},fade*1000+200);
     } else {
       try{audioEl.pause();audioEl.src='';}catch(e){}audioEl=null;
@@ -1242,14 +1254,13 @@ btnPreview.addEventListener('click',()=>{
   if(isBgmActive())stopBgm(0.3);
   setTimeout(()=>{
     audioEl=new Audio();
-    audioEl.crossOrigin='anonymous';
     audioEl.volume=getVol()/100;
     audioEl.src=url;
     audioEl.play()
       .then(()=>setSt('▶ 試聴中… 問題なければ🎵ボタンでONにしてください','ok'))
       .catch(()=>{
         audioEl=null;
-        setSt('再生できませんでした（CORS制限またはURL不正）','alert');
+        setSt('再生できませんでした（URLが無効か非対応形式です）','alert');
       });
   },400);
 });
