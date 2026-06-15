@@ -243,7 +243,7 @@
     <b>2.</b> プロジェクト作成 → 「APIとサービス」→「ライブラリ」→ <b>Google Calendar API</b> を有効化<br>
     <b>3.</b> 「認証情報」→「認証情報を作成」→ <b>OAuthクライアントID</b><br>
     &nbsp;&nbsp;&nbsp;種類：<b>ウェブアプリケーション</b><br>
-    &nbsp;&nbsp;&nbsp;承認済みJavaScript生成元：<code>https://claude.ai</code> を追加<br>
+    &nbsp;&nbsp;&nbsp;承認済みJavaScript生成元：<code>https://mac-moz.github.io</code> を追加<br>
     <b>4.</b> 作成された <b>クライアントID</b> を下に貼り付けてください
   </div>
   <div class="setup-input-row">
@@ -395,12 +395,29 @@ function todayStr(){
 function getLogs(){
   try{return JSON.parse(localStorage.getItem(LOG_KEY)||'[]');}catch(e){return[];}
 }
-function saveLogs(logs){localStorage.setItem(LOG_KEY,JSON.stringify(logs))}
+function saveLogs(logs){
+  // 30日超の古いログを自動削除してストレージ肥大化を防ぐ
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  const cutStr=cutoff.toISOString().slice(0,10);
+  localStorage.setItem(LOG_KEY,JSON.stringify(logs.filter(l=>!l.date||l.date>=cutStr)));
+}
 function getTodayLogs(){return getLogs().filter(l=>l.date===todayStr())}
 function updateLog(id,updates){
   const logs=getLogs();
   const idx=logs.findIndex(l=>l.id===id);
   if(idx>=0){Object.assign(logs[idx],updates);saveLogs(logs);}
+}
+
+// ══════════════════════════════════════════
+//  XSS対策ユーティリティ
+// ══════════════════════════════════════════
+function escHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
 // ══════════════════════════════════════════
@@ -440,7 +457,7 @@ function renderLogs(){
           : '<span class="cb-ph"></span>'
         }
         <div class="rd${log.partial?' p':''}"></div>
-        <div class="rn">${log.task}${log.partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
+        <div class="rn">${escHtml(log.task)}${log.partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
         <div class="rtm">${ft(log.start)}–${ft(log.end)}<br><span style="font-size:10px">${fmt(elapsed)}</span></div>
         <div class="ric" id="${log.id}">
           ${log.registered
@@ -468,7 +485,7 @@ function selectAllToggle(checked){
 // ══════════════════════════════════════════
 async function registerOne(logId){
   if(!gToken){
-    pendingRegIds=[logId];
+    if(!pendingRegIds.includes(logId))pendingRegIds.push(logId);
     setSt('📅 Google にログインして記録を登録します','alert');
     doAuth();
     return;
@@ -552,6 +569,10 @@ function doAuth(){
     setupPanel.classList.remove('hidden');
     return;
   }
+  if(typeof google==='undefined'||!google?.accounts?.oauth2){
+    setSt('⏳ Google サービスを読込中です。少しお待ちください...','alert');
+    return;
+  }
   const client=google.accounts.oauth2.initTokenClient({
     client_id:clientId,
     scope:SCOPES,
@@ -564,7 +585,7 @@ function doAuth(){
         return;
       }
       gToken=resp.access_token;
-      setTimeout(()=>{gToken=null;updateAuthUI();},3500*1000);
+      setTimeout(()=>{gToken=null;updateAuthUI();},(resp.expires_in||3500)*1000);
       setSt('✅ Google カレンダーに接続しました','ok');
       updateAuthUI();
 
@@ -809,7 +830,7 @@ function tick(){
 
   if(s.phase==='work'){
     playEnd();s.done++;updatePips();
-    const endT=new Date(),startT=new Date(endT-WORK*1000);
+    const endT=new Date(),startT=s.sessionStart||new Date(endT-WORK*1000);
     const logId=addRec(taskSel.value,startT,endT,false);
     if(gToken){
       setSt('セッション完了！カレンダーに登録中...','ok');
@@ -836,7 +857,7 @@ function endPartial(){
   clearInterval(s.tid);s.running=false;
   stopCdBeeps();td.classList.remove('pulsing');stopBgm(.5);showEndBtn(false);
   playPartial();
-  const endT=new Date(),elapsed=WORK-s.rem,startT=new Date(endT-elapsed*1000);
+  const endT=new Date(),elapsed=WORK-s.rem,startT=s.sessionStart||new Date(endT-elapsed*1000);
   const logId=addRec(taskSel.value,startT,endT,true);
   if(gToken){
     setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');
