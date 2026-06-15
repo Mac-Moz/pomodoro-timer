@@ -22,6 +22,7 @@
                      radial-gradient(ellipse at 80% 100%,rgba(107,143,107,.12) 0%,transparent 50%);
   }
   h1{font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:18px}
+  .hidden{display:none!important}
 
   /* ─── セットアップパネル ─── */
   .setup-panel{
@@ -68,7 +69,7 @@
   .btn-auth:hover{background:var(--fm)}
 
   /* ─── BGM ─── */
-  .bgm-row{width:100%;max-width:380px;display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .bgm-row{width:100%;max-width:380px;display:flex;gap:8px;align-items:center;margin-bottom:8px}
   .bgm-label{font-size:11px;letter-spacing:.1em;color:var(--dim);white-space:nowrap}
   .bgm-sel{
     flex:1;background:var(--cb);border:1px solid var(--fl);border-radius:8px;
@@ -82,6 +83,42 @@
   }
   .btn-bgm.on{color:var(--al);border-color:var(--am)}
   .btn-bgm:hover{background:var(--fm)}
+
+  /* BGM 音量スライダー */
+  .bgm-vol-row{width:100%;max-width:380px;display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .bgm-vol{
+    flex:1;accent-color:var(--am);cursor:pointer;height:4px;
+    background:linear-gradient(to right, var(--am) 0%, var(--am) 50%, var(--fl) 50%, var(--fl) 100%);
+    border-radius:2px;outline:none;appearance:none;border:none;
+  }
+  .bgm-vol::-webkit-slider-thumb{
+    -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+    background:var(--al);cursor:pointer;box-shadow:0 0 4px rgba(200,137,26,.5);
+  }
+  .bgm-vol-pct{font-size:11px;color:var(--dim);width:30px;text-align:right;flex-shrink:0}
+
+  /* BGM カスタムURL */
+  .bgm-url-area{width:100%;max-width:380px;display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .bgm-url-input{
+    flex:1;background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--cr);font-family:'Inter',sans-serif;font-size:12px;
+    padding:8px 12px;outline:none;
+  }
+  .bgm-url-input:focus{border-color:var(--am)}
+  .bgm-url-input::placeholder{color:var(--dim);font-size:11px}
+  .btn-preview{
+    background:var(--cb);border:1px solid var(--fl);border-radius:8px;
+    color:var(--al);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+    padding:8px 12px;cursor:pointer;white-space:nowrap;transition:background .16s;flex-shrink:0;
+  }
+  .btn-preview:hover{background:var(--fm)}
+  .bgm-sites{
+    width:100%;max-width:380px;font-size:11px;color:var(--dim);
+    line-height:1.8;margin-bottom:12px;padding:8px 12px;
+    background:rgba(45,74,45,0.3);border-radius:8px;border:1px solid var(--fl);
+  }
+  .bgm-sites a{color:var(--al);text-decoration:none;font-weight:500}
+  .bgm-sites a:hover{text-decoration:underline}
 
   /* ─── タスク行 ─── */
   .task-row{width:100%;max-width:380px;display:flex;gap:8px;margin-bottom:24px}
@@ -218,15 +255,45 @@
   }
   .btn-reg-one:hover{background:var(--fm)}
 
-  /* ─── モーダル ─── */
+  /* ─── モーダル共通 ─── */
   .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
        z-index:200;align-items:center;justify-content:center}
   .mbg.open{display:flex}
   .mo{background:var(--fm);border:1px solid var(--fl);border-radius:12px;
       padding:22px;width:300px;display:flex;flex-direction:column;gap:12px}
+  .mo-wide{width:360px;max-height:80vh;overflow-y:auto}
   .mo h3{font-size:14px;font-weight:600}
   .mbt{display:flex;gap:8px;justify-content:flex-end}
   .bsm{font-size:13px;padding:8px 16px;min-width:auto}
+
+  /* ─── タスク管理モーダル ─── */
+  .task-item{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(26,46,26,0.5);border:1px solid var(--fl);border-radius:6px;
+    padding:8px 12px;
+  }
+  .task-item-idx{font-size:10px;color:var(--dim);width:16px;flex-shrink:0;text-align:center}
+  .task-item-name{flex:1;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .task-item-edit{
+    background:transparent;border:1px solid var(--fl);color:var(--dim);
+    border-radius:4px;font-size:11px;padding:3px 7px;cursor:pointer;
+    font-family:'Inter',sans-serif;transition:all .14s;flex-shrink:0;
+  }
+  .task-item-edit:hover{border-color:var(--am);color:var(--al)}
+  .btn-del-task{
+    background:transparent;border:none;color:var(--dim);font-size:15px;
+    cursor:pointer;padding:2px 5px;border-radius:4px;transition:all .14s;flex-shrink:0;line-height:1;
+  }
+  .btn-del-task:hover{background:rgba(200,75,42,.2);color:#f07050}
+  .task-mgr-add{display:flex;gap:8px;align-items:center;margin-top:4px}
+  .task-mgr-add input{
+    flex:1;background:rgba(26,46,26,0.5);border:1px solid var(--fl);border-radius:8px;
+    color:var(--cr);font-family:'Inter',sans-serif;font-size:13px;
+    padding:8px 12px;outline:none;
+  }
+  .task-mgr-add input:focus{border-color:var(--am)}
+  .task-mgr-add input::placeholder{color:var(--dim);font-size:12px}
+  .task-mgr-footer{display:flex;gap:8px;justify-content:space-between;margin-top:4px}
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
   .pulsing{animation:pulse .75s ease-in-out infinite}
@@ -265,21 +332,40 @@
   <select class="bgm-sel" id="bgmSel">
     <option value="ambient">🌧 アンビエント・雨音</option>
     <option value="classic">🎻 クラシック風（弦楽）</option>
-    <option value="piano">🎹 ピアノ・チル</option>
+    <option value="piano">🎹 ピアノ・コード進行</option>
+    <option value="lofi">🎸 Lo-Fi チル</option>
     <option value="white">〰 ホワイトノイズ</option>
     <option value="brown">🌊 ブラウンノイズ（波音）</option>
+    <option value="custom">🔗 カスタムURL</option>
     <option value="none">🔇 BGMなし</option>
   </select>
   <button class="btn-bgm" id="btnBgm">🎵</button>
 </div>
 
+<!-- 音量スライダー -->
+<div class="bgm-vol-row">
+  <span class="bgm-label">音量</span>
+  <input type="range" id="bgmVol" class="bgm-vol" min="0" max="100" value="50">
+  <span id="bgmVolPct" class="bgm-vol-pct">50%</span>
+</div>
+
+<!-- カスタムURL入力 -->
+<div class="bgm-url-area hidden" id="bgmUrlArea">
+  <input type="text" id="bgmUrlInput" class="bgm-url-input" placeholder="MP3 / OGG の直リンクを貼り付け...">
+  <button class="btn-preview" id="btnPreview">▶ 試聴</button>
+</div>
+<div class="bgm-sites hidden" id="bgmSites">
+  🎵 おすすめ無料BGMサイト（MP3直リンクを右クリック→「リンクをコピー」）<br>
+  <a href="https://incompetech.com/music/royalty-free/music.html" target="_blank">Incompetech</a> ·
+  <a href="https://freemusicarchive.org/genre/Ambient/" target="_blank">Free Music Archive</a> ·
+  <a href="https://pixabay.com/music/search/ambient/" target="_blank">Pixabay Music</a> ·
+  <a href="https://archive.org/details/audio" target="_blank">Internet Archive</a>
+</div>
+
 <!-- タスク -->
 <div class="task-row">
-  <select id="taskSel">
-    <option>経理作業</option><option>請求書確認</option>
-    <option>メール対応</option><option>資料作成</option><option>その他</option>
-  </select>
-  <button class="btn-xs" id="btnAdd">＋</button>
+  <select id="taskSel"></select>
+  <button class="btn-xs" id="btnMgr" title="タスク管理">⚙</button>
 </div>
 
 <!-- リング -->
@@ -308,7 +394,7 @@
 <div id="sb">タスクを選んでスタートしてください</div>
 <hr>
 
-<!-- 未登録バナー（ログイン後に表示） -->
+<!-- 未登録バナー -->
 <div id="unregBanner">
   <span id="unregBannerText"></span>
   <button class="btn-banner" onclick="registerAllUnregistered()">今すぐ登録</button>
@@ -321,14 +407,30 @@
 <!-- 記録リスト -->
 <div id="rl"><div class="empty">完了したセッションがここに表示されます</div></div>
 
-<!-- タスク追加モーダル -->
-<div class="mbg" id="modal">
+<!-- ─── タスク管理モーダル ─── -->
+<div class="mbg" id="modalTaskMgr">
+  <div class="mo mo-wide">
+    <h3>⚙ タスク管理</h3>
+    <div id="taskMgrList" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div class="task-mgr-add">
+      <input type="text" id="taskMgrInput" placeholder="新しいタスク名..." maxlength="30">
+      <button class="btn btn-pri bsm" id="btnTaskMgrAdd">追加</button>
+    </div>
+    <div class="task-mgr-footer">
+      <button class="btn btn-gh bsm" id="btnTaskMgrReset">🔄 デフォルトに戻す</button>
+      <button class="btn btn-gh bsm" id="btnTaskMgrClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── タスク編集モーダル ─── -->
+<div class="mbg" id="modalTaskEdit">
   <div class="mo">
-    <h3>タスクを追加</h3>
-    <input type="text" id="nti" placeholder="タスク名..." maxlength="30">
+    <h3>タスク名を編集</h3>
+    <input type="text" id="taskEditInput" maxlength="30">
     <div class="mbt">
-      <button class="btn btn-gh bsm" id="btnCan">キャンセル</button>
-      <button class="btn btn-pri bsm" id="btnCon">追加</button>
+      <button class="btn btn-gh bsm" id="btnTaskEditCancel">キャンセル</button>
+      <button class="btn btn-pri bsm" id="btnTaskEditSave">保存</button>
     </div>
   </div>
 </div>
@@ -344,15 +446,22 @@ const CIRC=2*Math.PI*98, WORK=25*60, BREAK=5*60, CD=30;
 const SCOPES='https://www.googleapis.com/auth/calendar.events';
 const CAL_BASE='https://www.googleapis.com/calendar/v3';
 const LOG_KEY='pomodoro_logs';
+const TASK_KEY='pomodoro_tasks';
+const VOL_KEY='pomodoro_bgm_vol';
+const BGM_URL_KEY='pomodoro_bgm_url';
+const BGM_TYPE_KEY='pomodoro_bgm_type';
+const DEFAULT_TASKS=['経理作業','請求書確認','メール対応','資料作成','その他'];
 
 let s={
   phase:'work',rem:WORK,running:false,done:0,
   bgmOn:false,cdActive:false,tid:null,sessionStart:null
 };
 let actx=null,bgmGain=null,bgmNodes=[],cdInt=null;
+let audioEl=null; // カスタムURL用
 let gToken=null;
 let clientId=localStorage.getItem('gcal_client_id')||'';
 let pendingRegIds=[];
+let editingTaskIdx=-1;
 
 // ══════════════════════════════════════════
 //  DOM
@@ -364,14 +473,26 @@ const td=document.getElementById('td'),pl=document.getElementById('pl'),
       btnEnd=document.getElementById('btnEnd'),
       btnBgm=document.getElementById('btnBgm'),
       bgmSel=document.getElementById('bgmSel'),
+      bgmVol=document.getElementById('bgmVol'),
+      bgmVolPct=document.getElementById('bgmVolPct'),
+      bgmUrlArea=document.getElementById('bgmUrlArea'),
+      bgmSites=document.getElementById('bgmSites'),
+      bgmUrlInput=document.getElementById('bgmUrlInput'),
+      btnPreview=document.getElementById('btnPreview'),
       sb=document.getElementById('sb'),
       rl=document.getElementById('rl'),
       taskSel=document.getElementById('taskSel'),
-      btnAdd=document.getElementById('btnAdd'),
-      modal=document.getElementById('modal'),
-      nti=document.getElementById('nti'),
-      btnCan=document.getElementById('btnCan'),
-      btnCon=document.getElementById('btnCon'),
+      btnMgr=document.getElementById('btnMgr'),
+      modalTaskMgr=document.getElementById('modalTaskMgr'),
+      taskMgrList=document.getElementById('taskMgrList'),
+      taskMgrInput=document.getElementById('taskMgrInput'),
+      btnTaskMgrAdd=document.getElementById('btnTaskMgrAdd'),
+      btnTaskMgrReset=document.getElementById('btnTaskMgrReset'),
+      btnTaskMgrClose=document.getElementById('btnTaskMgrClose'),
+      modalTaskEdit=document.getElementById('modalTaskEdit'),
+      taskEditInput=document.getElementById('taskEditInput'),
+      btnTaskEditCancel=document.getElementById('btnTaskEditCancel'),
+      btnTaskEditSave=document.getElementById('btnTaskEditSave'),
       setupPanel=document.getElementById('setupPanel'),
       clientIdInput=document.getElementById('clientIdInput'),
       btnSaveClientId=document.getElementById('btnSaveClientId'),
@@ -386,6 +507,107 @@ const td=document.getElementById('td'),pl=document.getElementById('pl'),
 rp.style.strokeDasharray=CIRC;
 
 // ══════════════════════════════════════════
+//  タスク管理
+// ══════════════════════════════════════════
+function getTasks(){
+  try{
+    const t=JSON.parse(localStorage.getItem(TASK_KEY));
+    return Array.isArray(t)&&t.length?t:DEFAULT_TASKS.slice();
+  }catch(e){return DEFAULT_TASKS.slice();}
+}
+function saveTasks(tasks){localStorage.setItem(TASK_KEY,JSON.stringify(tasks));}
+
+function renderTaskSelect(){
+  const tasks=getTasks();
+  const cur=taskSel.value;
+  taskSel.innerHTML=tasks.map(t=>`<option value="${escHtml(t)}">${escHtml(t)}</option>`).join('');
+  if(tasks.includes(cur))taskSel.value=cur;
+}
+
+function openTaskMgr(){
+  renderTaskMgr();
+  modalTaskMgr.classList.add('open');
+  setTimeout(()=>taskMgrInput.focus(),80);
+}
+
+function renderTaskMgr(){
+  const tasks=getTasks();
+  taskMgrList.innerHTML=tasks.map((t,i)=>`
+    <div class="task-item">
+      <span class="task-item-idx">${i+1}</span>
+      <span class="task-item-name" title="${escHtml(t)}">${escHtml(t)}</span>
+      <button class="task-item-edit" onclick="openTaskEdit(${i})">編集</button>
+      <button class="btn-del-task" onclick="deleteTask(${i})" title="削除">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteTask(idx){
+  const tasks=getTasks();
+  if(tasks.length<=1){setSt('タスクは最低1件必要です','alert');return;}
+  tasks.splice(idx,1);
+  saveTasks(tasks);
+  renderTaskMgr();
+  renderTaskSelect();
+}
+
+function openTaskEdit(idx){
+  const tasks=getTasks();
+  editingTaskIdx=idx;
+  taskEditInput.value=tasks[idx];
+  modalTaskMgr.classList.remove('open');
+  modalTaskEdit.classList.add('open');
+  setTimeout(()=>{taskEditInput.select();taskEditInput.focus();},80);
+}
+
+btnTaskEditSave.addEventListener('click',()=>{
+  const v=taskEditInput.value.trim();
+  if(!v)return;
+  const tasks=getTasks();
+  tasks[editingTaskIdx]=v;
+  saveTasks(tasks);
+  renderTaskSelect();
+  modalTaskEdit.classList.remove('open');
+  modalTaskMgr.classList.add('open');
+  renderTaskMgr();
+});
+btnTaskEditCancel.addEventListener('click',()=>{
+  modalTaskEdit.classList.remove('open');
+  modalTaskMgr.classList.add('open');
+});
+taskEditInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter')btnTaskEditSave.click();
+  if(e.key==='Escape')btnTaskEditCancel.click();
+});
+
+btnTaskMgrAdd.addEventListener('click',()=>{
+  const v=taskMgrInput.value.trim();
+  if(!v)return;
+  const tasks=getTasks();
+  tasks.push(v);
+  saveTasks(tasks);
+  taskMgrInput.value='';
+  renderTaskMgr();
+  renderTaskSelect();
+  taskSel.value=v;
+  taskMgrInput.focus();
+});
+taskMgrInput.addEventListener('keydown',e=>{if(e.key==='Enter')btnTaskMgrAdd.click();});
+
+btnTaskMgrReset.addEventListener('click',()=>{
+  if(!confirm('タスクをデフォルトの5件に戻しますか？\n（現在のカスタムタスクは削除されます）'))return;
+  saveTasks(DEFAULT_TASKS.slice());
+  renderTaskMgr();
+  renderTaskSelect();
+});
+btnTaskMgrClose.addEventListener('click',()=>modalTaskMgr.classList.remove('open'));
+btnMgr.addEventListener('click',openTaskMgr);
+
+// モーダル外クリックで閉じる
+modalTaskMgr.addEventListener('click',e=>{if(e.target===modalTaskMgr)modalTaskMgr.classList.remove('open');});
+modalTaskEdit.addEventListener('click',e=>{if(e.target===modalTaskEdit)btnTaskEditCancel.click();});
+
+// ══════════════════════════════════════════
 //  localStorage ログ管理
 // ══════════════════════════════════════════
 function todayStr(){
@@ -396,7 +618,6 @@ function getLogs(){
   try{return JSON.parse(localStorage.getItem(LOG_KEY)||'[]');}catch(e){return[];}
 }
 function saveLogs(logs){
-  // 30日超の古いログを自動削除してストレージ肥大化を防ぐ
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
   const cutStr=cutoff.toISOString().slice(0,10);
   localStorage.setItem(LOG_KEY,JSON.stringify(logs.filter(l=>!l.date||l.date>=cutStr)));
@@ -409,7 +630,7 @@ function updateLog(id,updates){
 }
 
 // ══════════════════════════════════════════
-//  XSS対策ユーティリティ
+//  XSS対策
 // ══════════════════════════════════════════
 function escHtml(s){
   return String(s)
@@ -427,7 +648,6 @@ function renderLogs(){
   const logs=getTodayLogs().reverse();
   const unregistered=logs.filter(l=>!l.registered);
 
-  // ヘッダー
   if(logs.length===0){
     recHeader.innerHTML='<div class="rec-hdr"><span class="rt-label">本日の記録</span></div>';
     rl.innerHTML='<div class="empty">完了したセッションがここに表示されます</div>';
@@ -441,11 +661,10 @@ function renderLogs(){
         : '<span class="cb-ph"></span>'
       }
       <span class="rt-label">本日の記録</span>
-      ${hasUnreg ? `<span class="unreg-badge">未登録 ${unregistered.length}件</span>` : ''}
-      ${hasUnreg ? `<button class="btn-bulk" id="btnBulk" onclick="registerSelected()" disabled>選択して登録</button>` : ''}
+      ${hasUnreg?`<span class="unreg-badge">未登録 ${unregistered.length}件</span>`:''}
+      ${hasUnreg?`<button class="btn-bulk" id="btnBulk" onclick="registerSelected()" disabled>選択して登録</button>`:''}
     </div>`;
 
-  // リスト
   const pn=n=>String(n).padStart(2,'0');
   const ft=ts=>{const d=new Date(ts);return `${pn(d.getHours())}:${pn(d.getMinutes())}`;};
   rl.innerHTML=logs.map(log=>{
@@ -453,16 +672,16 @@ function renderLogs(){
     return `
       <div class="ri${log.partial?' partial':''}${log.registered?' registered':''}" data-id="${log.id}">
         ${!log.registered
-          ? `<input type="checkbox" class="log-cb" data-id="${log.id}" onchange="updateBulkBtn()">`
-          : '<span class="cb-ph"></span>'
+          ?`<input type="checkbox" class="log-cb" data-id="${log.id}" onchange="updateBulkBtn()">`
+          :'<span class="cb-ph"></span>'
         }
         <div class="rd${log.partial?' p':''}"></div>
         <div class="rn">${escHtml(log.task)}${log.partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
         <div class="rtm">${ft(log.start)}–${ft(log.end)}<br><span style="font-size:10px">${fmt(elapsed)}</span></div>
         <div class="ric" id="${log.id}">
           ${log.registered
-            ? '📅'
-            : `<button class="btn-reg-one" onclick="registerOne('${log.id}')">登録</button>`
+            ?'📅'
+            :`<button class="btn-reg-one" onclick="registerOne('${log.id}')">登録</button>`
           }
         </div>
       </div>`;
@@ -474,7 +693,6 @@ function updateBulkBtn(){
   const btn=document.getElementById('btnBulk');
   if(btn)btn.disabled=checked===0;
 }
-
 function selectAllToggle(checked){
   rl.querySelectorAll('.log-cb').forEach(cb=>cb.checked=checked);
   updateBulkBtn();
@@ -487,33 +705,21 @@ async function registerOne(logId){
   if(!gToken){
     if(!pendingRegIds.includes(logId))pendingRegIds.push(logId);
     setSt('📅 Google にログインして記録を登録します','alert');
-    doAuth();
-    return;
+    doAuth();return;
   }
   await registerCal(logId);
 }
-
 async function registerSelected(){
   const ids=[...rl.querySelectorAll('.log-cb:checked')].map(cb=>cb.dataset.id);
   if(!ids.length)return;
-  if(!gToken){
-    pendingRegIds=ids;
-    setSt('📅 Google にログインして記録を登録します','alert');
-    doAuth();
-    return;
-  }
+  if(!gToken){pendingRegIds=ids;setSt('📅 Google にログインして記録を登録します','alert');doAuth();return;}
   for(const id of ids)await registerCal(id);
 }
-
 async function registerAllUnregistered(){
   unregBanner.style.display='none';
   const logs=getTodayLogs().filter(l=>!l.registered);
   for(const log of logs)await registerCal(log.id);
 }
-
-// ══════════════════════════════════════════
-//  ログイン後の未登録プロンプト
-// ══════════════════════════════════════════
 function showUnregisteredPrompt(count){
   unregBannerText.textContent=`📋 未登録の記録が ${count}件 あります`;
   unregBanner.style.display='flex';
@@ -523,79 +729,86 @@ function showUnregisteredPrompt(count){
 //  セットアップ・認証
 // ══════════════════════════════════════════
 function init(){
-  if(clientId){
-    clientIdInput.value=clientId;
-    setupPanel.classList.add('hidden');
-    updateAuthUI();
-  }
+  if(clientId){clientIdInput.value=clientId;setupPanel.classList.add('hidden');updateAuthUI();}
+
+  // タスク復元
+  renderTaskSelect();
+
+  // BGM設定復元
+  const savedType=localStorage.getItem(BGM_TYPE_KEY);
+  if(savedType){bgmSel.value=savedType;}
+  toggleBgmUrlArea();
+
+  // 音量復元
+  const vol=parseInt(localStorage.getItem(VOL_KEY)||'50',10);
+  bgmVol.value=vol;
+  updateVolDisplay(vol);
+
+  // カスタムURL復元
+  const savedUrl=localStorage.getItem(BGM_URL_KEY)||'';
+  if(savedUrl)bgmUrlInput.value=savedUrl;
+
   renderLogs();
+}
+
+function toggleBgmUrlArea(){
+  const isCustom=bgmSel.value==='custom';
+  bgmUrlArea.classList.toggle('hidden',!isCustom);
+  bgmSites.classList.toggle('hidden',!isCustom);
+}
+
+function updateVolDisplay(v){
+  bgmVolPct.textContent=v+'%';
+  // スライダーの塗り分け
+  bgmVol.style.background=
+    `linear-gradient(to right,var(--am) 0%,var(--am) ${v}%,var(--fl) ${v}%,var(--fl) 100%)`;
 }
 
 btnSaveClientId.addEventListener('click',()=>{
   const v=clientIdInput.value.trim();
   if(!v||!v.includes('.apps.googleusercontent.com')){
-    alert('有効なクライアントIDを入力してください\n（例: xxxxxx.apps.googleusercontent.com）');
-    return;
+    alert('有効なクライアントIDを入力してください\n（例: xxxxxx.apps.googleusercontent.com）');return;
   }
-  clientId=v;
-  localStorage.setItem('gcal_client_id',v);
-  setupPanel.classList.add('hidden');
-  updateAuthUI();
+  clientId=v;localStorage.setItem('gcal_client_id',v);
+  setupPanel.classList.add('hidden');updateAuthUI();
 });
 
 function updateAuthUI(){
   if(!clientId){
     authDot.className='auth-dot';
     authLabel.textContent='クライアントIDを設定してください';
-    btnAuth.textContent='設定する';
-    btnAuth.onclick=()=>setupPanel.classList.remove('hidden');
-    return;
+    btnAuth.textContent='設定する';btnAuth.onclick=()=>setupPanel.classList.remove('hidden');return;
   }
   if(gToken){
     authDot.className='auth-dot ok';
     authLabel.textContent='Google カレンダーに接続済み';
-    btnAuth.textContent='再認証';
-    btnAuth.onclick=doAuth;
+    btnAuth.textContent='再認証';btnAuth.onclick=doAuth;
   } else {
     authDot.className='auth-dot fail';
     authLabel.textContent='未認証 — ログインしてカレンダーに接続';
-    btnAuth.textContent='ログイン';
-    btnAuth.onclick=doAuth;
+    btnAuth.textContent='ログイン';btnAuth.onclick=doAuth;
   }
 }
 
 function doAuth(){
-  if(!clientId){
-    setupPanel.classList.remove('hidden');
-    return;
-  }
+  if(!clientId){setupPanel.classList.remove('hidden');return;}
   if(typeof google==='undefined'||!google?.accounts?.oauth2){
-    setSt('⏳ Google サービスを読込中です。少しお待ちください...','alert');
-    return;
+    setSt('⏳ Google サービスを読込中です。少しお待ちください...','alert');return;
   }
   const client=google.accounts.oauth2.initTokenClient({
-    client_id:clientId,
-    scope:SCOPES,
+    client_id:clientId,scope:SCOPES,
     callback:async(resp)=>{
       if(resp.error){
         setSt('認証に失敗しました: '+resp.error,'alert');
-        gToken=null;
-        pendingRegIds=[];
-        updateAuthUI();
-        return;
+        gToken=null;pendingRegIds=[];updateAuthUI();return;
       }
       gToken=resp.access_token;
       setTimeout(()=>{gToken=null;updateAuthUI();},(resp.expires_in||3500)*1000);
-      setSt('✅ Google カレンダーに接続しました','ok');
-      updateAuthUI();
-
+      setSt('✅ Google カレンダーに接続しました','ok');updateAuthUI();
       if(pendingRegIds.length>0){
-        // 認証前に「登録」ボタンを押していた記録を登録
-        const ids=[...pendingRegIds];
-        pendingRegIds=[];
+        const ids=[...pendingRegIds];pendingRegIds=[];
         for(const id of ids)await registerCal(id);
       } else {
-        // 未登録ログがあればバナーで促す
         const unregCount=getTodayLogs().filter(l=>!l.registered).length;
         if(unregCount>0)showUnregisteredPrompt(unregCount);
       }
@@ -608,72 +821,58 @@ function doAuth(){
 //  Google Calendar API
 // ══════════════════════════════════════════
 async function registerCal(logId){
-  const logs=getLogs();
-  const log=logs.find(l=>l.id===logId);
-  if(!log)return;
-
-  if(!gToken){
-    setSt('⚠️ Google 認証が必要です','alert');
-    return;
-  }
-
-  // スピナー表示
+  const logs=getLogs();const log=logs.find(l=>l.id===logId);if(!log)return;
+  if(!gToken){setSt('⚠️ Google 認証が必要です','alert');return;}
   const ricEl=document.getElementById(logId);
   if(ricEl)ricEl.innerHTML='<span class="sp"></span>';
-
   const title=log.partial?`🍅⏹ ${log.task}（途中終了）`:`🍅 ${log.task}`;
   const elapsed=Math.round((log.end-log.start)/1000);
-  const desc=log.partial
-    ?`ポモドーロタイマー：途中終了\n経過時間: ${fmt(elapsed)}`
-    :`ポモドーロタイマー：25分セッション完了`;
-
+  const desc=log.partial?`ポモドーロタイマー：途中終了\n経過時間: ${fmt(elapsed)}`:`ポモドーロタイマー：25分セッション完了`;
   const pn=n=>String(n).padStart(2,'0');
   const toISO=ts=>{
-    const d=new Date(ts);
-    const off=-d.getTimezoneOffset();
+    const d=new Date(ts);const off=-d.getTimezoneOffset();
     const sign=off>=0?'+':'-';
     const hh=pn(Math.floor(Math.abs(off)/60)),mm=pn(Math.abs(off)%60);
     return `${d.getFullYear()}-${pn(d.getMonth()+1)}-${pn(d.getDate())}T${pn(d.getHours())}:${pn(d.getMinutes())}:${pn(d.getSeconds())}${sign}${hh}:${mm}`;
   };
-
   const body={
-    summary:title,
-    description:desc,
+    summary:title,description:desc,
     start:{dateTime:toISO(log.start),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
     end:  {dateTime:toISO(log.end),  timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
   };
-
   try{
     const res=await fetch(`${CAL_BASE}/calendars/primary/events`,{
       method:'POST',
       headers:{'Authorization':`Bearer ${gToken}`,'Content-Type':'application/json'},
       body:JSON.stringify(body)
     });
-    if(res.status===401){
-      gToken=null;updateAuthUI();
-      setSt('⚠️ 認証が切れました。再ログインしてください','alert');
-      renderLogs();
-      return;
-    }
+    if(res.status===401){gToken=null;updateAuthUI();setSt('⚠️ 認証が切れました。再ログインしてください','alert');renderLogs();return;}
     const data=await res.json();
-    if(data.id){
-      updateLog(logId,{registered:true});
-      renderLogs();
-      setSt(`✅ "${log.task}" をカレンダーに登録しました`,'ok');
-    } else {
-      if(ricEl)ricEl.innerHTML='⚠️';
-      setSt('カレンダー登録に失敗しました（'+(data.error?.message||'不明')+')','alert');
-    }
-  }catch(e){
-    if(ricEl)ricEl.innerHTML='⚠️';
-    setSt('カレンダー登録エラー: '+e.message,'alert');
-  }
+    if(data.id){updateLog(logId,{registered:true});renderLogs();setSt(`✅ "${log.task}" をカレンダーに登録しました`,'ok');}
+    else{if(ricEl)ricEl.innerHTML='⚠️';setSt('カレンダー登録に失敗しました（'+(data.error?.message||'不明')+')','alert');}
+  }catch(e){if(ricEl)ricEl.innerHTML='⚠️';setSt('カレンダー登録エラー: '+e.message,'alert');}
 }
+
+// ══════════════════════════════════════════
+//  音量ユーティリティ
+// ══════════════════════════════════════════
+function getVol(){return parseInt(bgmVol.value,10);}
+function gainFromVol(v){return (v/100)*0.28;}
+
+bgmVol.addEventListener('input',()=>{
+  const v=getVol();
+  updateVolDisplay(v);
+  localStorage.setItem(VOL_KEY,v);
+  if(audioEl){audioEl.volume=v/100;}
+  else if(bgmGain&&actx){bgmGain.gain.setValueAtTime(gainFromVol(v),actx.currentTime);}
+});
 
 // ══════════════════════════════════════════
 //  Audio
 // ══════════════════════════════════════════
 function initAudio(){if(actx)return;actx=new(window.AudioContext||window.webkitAudioContext)()}
+
+function isBgmActive(){return bgmNodes.length>0||audioEl!==null;}
 
 function makeNoise(color){
   const sr=actx.sampleRate,len=sr*4;
@@ -683,59 +882,167 @@ function makeNoise(color){
   const src=actx.createBufferSource();src.buffer=buf;src.loop=true;return src;
 }
 
+// ── シンプルなリバーブ（並列ディレイ）
+function createReverb(){
+  const merger=actx.createGain();merger.gain.value=0.28;
+  [0.07,0.11,0.17,0.23].forEach(dt=>{
+    const del=actx.createDelay(1);del.delayTime.value=dt;
+    const fb=actx.createGain();fb.gain.value=0.22;
+    del.connect(fb);fb.connect(del);
+    del.connect(merger);
+    bgmNodes.push(del);
+  });
+  return merger;
+}
+
 function startBgm(){
-  if(!actx||bgmNodes.length)return;
+  if(!actx||isBgmActive())return;
   const type=bgmSel.value;if(type==='none')return;
+  const vol=getVol();
+
+  // ── カスタムURL（<audio>要素で再生）
+  if(type==='custom'){
+    const url=bgmUrlInput.value.trim()||localStorage.getItem(BGM_URL_KEY)||'';
+    if(!url){setSt('カスタムURLを入力してください','alert');s.bgmOn=false;btnBgm.classList.remove('on');return;}
+    audioEl=new Audio();
+    audioEl.crossOrigin='anonymous';
+    audioEl.loop=true;
+    audioEl.volume=vol/100;
+    audioEl.src=url;
+    audioEl.play()
+      .then(()=>setSt('BGM ON：カスタムURL','ok'))
+      .catch(()=>{
+        audioEl=null;
+        setSt('再生できませんでした（CORS制限またはURL不正）','alert');
+        s.bgmOn=false;btnBgm.classList.remove('on');
+      });
+    return;
+  }
+
+  // ── 合成BGM（Web Audio API）
   bgmGain=actx.createGain();
+  const targetGain=gainFromVol(vol);
   bgmGain.gain.setValueAtTime(0,actx.currentTime);
-  bgmGain.gain.linearRampToValueAtTime(0.15,actx.currentTime+3);
+  bgmGain.gain.linearRampToValueAtTime(targetGain,actx.currentTime+3);
   bgmGain.connect(actx.destination);
 
   if(type==='ambient'){
+    // 雨音ノイズ + リバーブ + 低音ドローン
     const src=makeNoise('white');
-    const bpf=actx.createBiquadFilter();bpf.type='bandpass';bpf.frequency.value=700;bpf.Q.value=0.6;
-    const lpf=actx.createBiquadFilter();lpf.type='lowpass';lpf.frequency.value=2800;
-    src.connect(bpf);bpf.connect(lpf);lpf.connect(bgmGain);src.start();bgmNodes.push(src);
-    const dg=actx.createGain();dg.gain.value=0.035;dg.connect(bgmGain);
+    const bpf=actx.createBiquadFilter();bpf.type='bandpass';bpf.frequency.value=650;bpf.Q.value=0.5;
+    const lpf=actx.createBiquadFilter();lpf.type='lowpass';lpf.frequency.value=3200;
+    const dryG=actx.createGain();dryG.gain.value=0.55;
+    src.connect(bpf);bpf.connect(lpf);lpf.connect(dryG);dryG.connect(bgmGain);
+    // リバーブ
+    const rev=createReverb();rev.connect(bgmGain);lpf.connect(rev);
+    src.start();bgmNodes.push(src);
+    // 低音ドローン
+    const dg=actx.createGain();dg.gain.value=0.03;dg.connect(bgmGain);
     [55,82,110].forEach((f,i)=>{
       const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
-      const lfo=actx.createOscillator();lfo.frequency.value=0.04+i*0.02;
-      const lg=actx.createGain();lg.gain.value=1.5;
+      const lfo=actx.createOscillator();lfo.frequency.value=0.03+i*0.015;
+      const lg=actx.createGain();lg.gain.value=1.2;
       lfo.connect(lg);lg.connect(o.frequency);o.connect(dg);
       o.start();lfo.start();bgmNodes.push(o,lfo);
     });
+
   } else if(type==='classic'){
-    const notes=[196,246.94,293.66,329.63,392];
+    // 弦楽器風：ビブラート付きサイン波コード
+    const notes=[196,246.94,293.66,369.99,493.88];
     notes.forEach((freq,i)=>{
-      const g=actx.createGain();g.gain.value=0.025;g.connect(bgmGain);
+      const g=actx.createGain();g.gain.value=0.022;g.connect(bgmGain);
       const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=freq;
-      const lfo=actx.createOscillator();lfo.frequency.value=5.5+i*0.3;
-      const lg=actx.createGain();lg.gain.value=2.5;
+      const lfo=actx.createOscillator();lfo.frequency.value=5.2+i*0.25;
+      const lg=actx.createGain();lg.gain.value=2.8;
       lfo.connect(lg);lg.connect(o.frequency);
-      const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1200;
-      o.connect(lp);lp.connect(g);o.start(actx.currentTime+i*0.3);lfo.start();
+      const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;
+      o.connect(lp);lp.connect(g);
+      o.start(actx.currentTime+i*0.35);lfo.start();
       bgmNodes.push(o,lfo);
     });
+    // ハーモニクス追加（オクターブ上）
+    [196,293.66].forEach(freq=>{
+      const g=actx.createGain();g.gain.value=0.008;g.connect(bgmGain);
+      const o=actx.createOscillator();o.type='triangle';o.frequency.value=freq*2;
+      o.start();o.connect(g);bgmNodes.push(o);
+    });
+
   } else if(type==='piano'){
-    const scale=[261.63,329.63,392,523.25];
+    // 4コード進行：C → Am → F → G
+    const CHORDS=[
+      [261.63,329.63,392,523.25],  // C major
+      [220,261.63,329.63,440],     // A minor
+      [174.61,261.63,349.23,440],  // F major
+      [196,246.94,392,493.88],     // G major
+    ];
     let t=actx.currentTime;
-    function chord(){
-      scale.forEach((f,i)=>{
+    let ci=0;
+    function playChord(){
+      if(!bgmGain)return;
+      const freqs=CHORDS[ci%4];ci++;
+      // コード音
+      freqs.forEach((f,i)=>{
         const o=actx.createOscillator(),g=actx.createGain();
         o.connect(g);g.connect(bgmGain);o.type='triangle';o.frequency.value=f;
-        const at=t+i*0.05;
-        g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.04,at+0.02);
-        g.gain.exponentialRampToValueAtTime(0.001,at+3.5);
-        o.start(at);o.stop(at+3.6);
-      });t+=8;
+        const at=t+i*0.07;
+        g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.032,at+0.06);
+        g.gain.exponentialRampToValueAtTime(0.001,at+5.5);
+        o.start(at);o.stop(at+5.6);
+      });
+      // ベース音（ルート1オクターブ下）
+      const bass=actx.createOscillator(),bg2=actx.createGain();
+      bass.connect(bg2);bg2.connect(bgmGain);bass.type='sine';bass.frequency.value=freqs[0]*0.5;
+      bg2.gain.setValueAtTime(0,t);bg2.gain.linearRampToValueAtTime(0.05,t+0.04);
+      bg2.gain.exponentialRampToValueAtTime(0.001,t+7);
+      bass.start(t);bass.stop(t+7.1);
+      t+=8;
     }
-    chord();chord();
-    const pid=setInterval(()=>{if(!bgmGain){clearInterval(pid);return}chord();},8000);
+    playChord();playChord();
+    const pid=setInterval(()=>{if(!bgmGain){clearInterval(pid);return;}playChord();},8000);
     bgmNodes.push({stop:()=>clearInterval(pid)});
+
+  } else if(type==='lofi'){
+    // Lo-Fi：ローパス処理したピアノ＋ビニールノイズ
+    const LOFI_CHORDS=[
+      [261.63,311.13,392],   // Cm7 風
+      [233.08,293.66,349.23],// Bbmaj7 風
+      [207.65,261.63,311.13],// Abmaj7 風
+      [220,261.63,329.63],   // Am7 風
+    ];
+    // ビニールノイズ
+    const noise=makeNoise('white');
+    const hpf=actx.createBiquadFilter();hpf.type='highpass';hpf.frequency.value=2000;
+    const noiseG=actx.createGain();noiseG.gain.value=0.018;
+    noise.connect(hpf);hpf.connect(noiseG);noiseG.connect(bgmGain);noise.start();
+    bgmNodes.push(noise);
+    // Lo-Fi ローパスフィルター（こもった音）
+    const lofi=actx.createBiquadFilter();lofi.type='lowpass';lofi.frequency.value=2200;lofi.Q.value=0.5;
+    lofi.connect(bgmGain);
+    let t2=actx.currentTime;let ci2=0;
+    function playLofi(){
+      if(!bgmGain)return;
+      const freqs=LOFI_CHORDS[ci2%4];ci2++;
+      freqs.forEach((f,i)=>{
+        const o=actx.createOscillator(),g=actx.createGain();
+        o.connect(g);g.connect(lofi);o.type='triangle';
+        o.frequency.value=f;
+        // ランダムなタイミングのずれでグルーヴ感
+        const at=t2+i*0.1+(Math.random()*0.02);
+        g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.036,at+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,at+4);
+        o.start(at);o.stop(at+4.1);
+      });
+      t2+=6;
+    }
+    playLofi();playLofi();
+    const pid2=setInterval(()=>{if(!bgmGain){clearInterval(pid2);return;}playLofi();},6000);
+    bgmNodes.push({stop:()=>clearInterval(pid2)});
+
   } else if(type==='white'){
     const src=makeNoise('white');
     const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=6000;
     src.connect(lp);lp.connect(bgmGain);src.start();bgmNodes.push(src);
+
   } else if(type==='brown'){
     const src=makeNoise('brown');
     const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;
@@ -747,15 +1054,35 @@ function startBgm(){
 }
 
 function fadeBgm(sec=5){
+  if(audioEl){
+    const startVol=audioEl.volume,steps=sec*10;let step=0;
+    const iv=setInterval(()=>{
+      step++;if(!audioEl){clearInterval(iv);return;}
+      audioEl.volume=Math.max(0,startVol*(1-step/steps));
+      if(step>=steps)clearInterval(iv);
+    },100);
+    return;
+  }
   if(!bgmGain)return;
   bgmGain.gain.setValueAtTime(bgmGain.gain.value,actx.currentTime);
   bgmGain.gain.linearRampToValueAtTime(0,actx.currentTime+sec);
 }
+
 function stopBgm(fade=1){
+  if(audioEl){
+    if(fade>0){
+      fadeBgm(fade);
+      const el=audioEl;audioEl=null;
+      setTimeout(()=>{try{el.pause();el.src='';}catch(e){}},fade*1000+200);
+    } else {
+      try{audioEl.pause();audioEl.src='';}catch(e){}audioEl=null;
+    }
+    return;
+  }
   if(!bgmNodes.length)return;
   fadeBgm(fade);
   const nodes=[...bgmNodes];bgmNodes=[];bgmGain=null;
-  setTimeout(()=>nodes.forEach(n=>{try{n.stop()}catch(e){}}),(fade+0.2)*1000);
+  setTimeout(()=>nodes.forEach(n=>{try{n.stop()}catch(e){}}) ,(fade+0.2)*1000);
 }
 
 function beep(freq,dur,delay=0,vol=0.26){
@@ -792,24 +1119,12 @@ function setSt(msg,cls=''){sb.textContent=msg;sb.className=cls}
 function showEndBtn(v){btnEnd.classList.toggle('show',v)}
 
 // ══════════════════════════════════════════
-//  記録追加（localStorage に保存）
+//  記録追加
 // ══════════════════════════════════════════
 function addRec(name,start,end,partial){
   const id=`r_${start.getTime()}`;
-  const log={
-    id,
-    task:name,
-    start:start.getTime(),
-    end:end.getTime(),
-    partial,
-    registered:false,
-    date:todayStr()
-  };
-  const logs=getLogs();
-  logs.push(log);
-  saveLogs(logs);
-  renderLogs();
-  return id;
+  const log={id,task:name,start:start.getTime(),end:end.getTime(),partial,registered:false,date:todayStr()};
+  const logs=getLogs();logs.push(log);saveLogs(logs);renderLogs();return id;
 }
 
 // ══════════════════════════════════════════
@@ -824,20 +1139,14 @@ function tick(){
     startCdBeeps();
   }
   if(s.rem>0)return;
-
   stopCdBeeps();td.classList.remove('pulsing');
   clearInterval(s.tid);s.running=false;showEndBtn(false);
-
   if(s.phase==='work'){
     playEnd();s.done++;updatePips();
     const endT=new Date(),startT=s.sessionStart||new Date(endT-WORK*1000);
     const logId=addRec(taskSel.value,startT,endT,false);
-    if(gToken){
-      setSt('セッション完了！カレンダーに登録中...','ok');
-      registerCal(logId);
-    } else {
-      setSt('セッション完了！ログに追加しました（ログインでカレンダーに登録できます）','ok');
-    }
+    if(gToken){setSt('セッション完了！カレンダーに登録中...','ok');registerCal(logId);}
+    else{setSt('セッション完了！ログに追加しました（ログインでカレンダーに登録できます）','ok');}
     s.phase='break';s.rem=BREAK;s.cdActive=false;
     pl.textContent='休憩中';td.textContent=fmt(BREAK);updateRing();btnStart.textContent='▶ 休憩開始';
   } else {
@@ -855,16 +1164,11 @@ function tick(){
 function endPartial(){
   if(!s.sessionStart)return;
   clearInterval(s.tid);s.running=false;
-  stopCdBeeps();td.classList.remove('pulsing');stopBgm(.5);showEndBtn(false);
-  playPartial();
+  stopCdBeeps();td.classList.remove('pulsing');stopBgm(.5);showEndBtn(false);playPartial();
   const endT=new Date(),elapsed=WORK-s.rem,startT=s.sessionStart||new Date(endT-elapsed*1000);
   const logId=addRec(taskSel.value,startT,endT,true);
-  if(gToken){
-    setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');
-    registerCal(logId);
-  } else {
-    setSt(`途中終了（${fmt(elapsed)}）をログに追加しました（ログインでカレンダーに登録できます）`,'ok');
-  }
+  if(gToken){setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');registerCal(logId);}
+  else{setSt(`途中終了（${fmt(elapsed)}）をログに追加しました（ログインでカレンダーに登録できます）`,'ok');}
   Object.assign(s,{phase:'work',rem:WORK,running:false,cdActive:false,tid:null,sessionStart:null});
   td.textContent=fmt(WORK);td.style.color='var(--cr)';
   rp.style.stroke='#6b8f6b';rp.style.filter='drop-shadow(0 0 7px #6b8f6b)';rp.style.strokeDashoffset=0;
@@ -910,25 +1214,45 @@ btnBgm.addEventListener('click',()=>{
   initAudio();s.bgmOn=!s.bgmOn;btnBgm.classList.toggle('on',s.bgmOn);
   if(s.bgmOn){
     if(s.running&&s.phase==='work'&&s.rem>CD)startBgm();
-    const labels={ambient:'雨音',classic:'クラシック風',piano:'ピアノ',white:'ホワイトノイズ',brown:'波音',none:'なし'};
-    setSt(`BGM ON：${labels[bgmSel.value]||bgmSel.value}`);
+    else if(!s.running){startBgm();} // オフ中でも試聴できる
+    const labels={ambient:'雨音',classic:'クラシック風',piano:'ピアノ進行',lofi:'Lo-Fi',white:'ホワイトノイズ',brown:'波音',custom:'カスタムURL',none:'なし'};
+    if(bgmSel.value!=='custom')setSt(`BGM ON：${labels[bgmSel.value]||bgmSel.value}`);
   } else {stopBgm();setSt('BGM: OFF')}
 });
 
 bgmSel.addEventListener('change',()=>{
-  if(s.bgmOn&&bgmNodes.length){
-    stopBgm(.5);setTimeout(()=>{if(s.bgmOn&&s.running&&s.phase==='work'&&s.rem>CD)startBgm();},600);
+  localStorage.setItem(BGM_TYPE_KEY,bgmSel.value);
+  toggleBgmUrlArea();
+  if(s.bgmOn&&isBgmActive()){
+    stopBgm(.5);setTimeout(()=>{if(s.bgmOn)startBgm();},600);
   }
 });
 
-btnAdd.addEventListener('click',()=>{nti.value='';modal.classList.add('open');setTimeout(()=>nti.focus(),80)});
-btnCan.addEventListener('click',()=>modal.classList.remove('open'));
-btnCon.addEventListener('click',()=>{
-  const v=nti.value.trim();if(!v)return;
-  const opt=document.createElement('option');opt.value=opt.textContent=v;
-  taskSel.appendChild(opt);taskSel.value=v;modal.classList.remove('open');
+// カスタムURL
+bgmUrlInput.addEventListener('change',()=>{
+  localStorage.setItem(BGM_URL_KEY,bgmUrlInput.value.trim());
 });
-nti.addEventListener('keydown',e=>{if(e.key==='Enter')btnCon.click();if(e.key==='Escape')btnCan.click()});
+
+btnPreview.addEventListener('click',()=>{
+  initAudio();
+  const url=bgmUrlInput.value.trim();
+  if(!url){setSt('URLを入力してください','alert');return;}
+  localStorage.setItem(BGM_URL_KEY,url);
+  // 既存BGMを停止して試聴開始
+  if(isBgmActive())stopBgm(0.3);
+  setTimeout(()=>{
+    audioEl=new Audio();
+    audioEl.crossOrigin='anonymous';
+    audioEl.volume=getVol()/100;
+    audioEl.src=url;
+    audioEl.play()
+      .then(()=>setSt('▶ 試聴中… 問題なければ🎵ボタンでONにしてください','ok'))
+      .catch(()=>{
+        audioEl=null;
+        setSt('再生できませんでした（CORS制限またはURL不正）','alert');
+      });
+  },400);
+});
 
 // 初期化
 init();
