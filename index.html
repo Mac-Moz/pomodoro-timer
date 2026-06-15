@@ -133,25 +133,90 @@
   #sb.ok{color:var(--al)}
 
   hr{width:100%;max-width:380px;border:none;border-top:1px solid var(--fm);margin-bottom:14px}
-  .rt{width:100%;max-width:380px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
-  #rl{width:100%;max-width:380px;display:flex;flex-direction:column;gap:7px}
 
+  /* ─── 未登録バナー ─── */
+  #unregBanner{
+    width:100%;max-width:380px;
+    background:rgba(200,137,26,0.12);
+    border:1px solid rgba(200,137,26,0.4);
+    border-radius:8px;padding:10px 14px;
+    margin-bottom:10px;
+    display:none;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:12px;
+  }
+  #unregBanner span{flex:1;min-width:120px}
+  .btn-banner{
+    background:var(--am);color:var(--fd);border:none;border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:600;
+    padding:6px 12px;cursor:pointer;white-space:nowrap;transition:background .16s;
+  }
+  .btn-banner:hover{background:var(--al)}
+  .btn-banner-cancel{
+    background:transparent;color:var(--dim);border:none;
+    font-family:'Inter',sans-serif;font-size:11px;
+    cursor:pointer;white-space:nowrap;padding:6px 4px;
+  }
+  .btn-banner-cancel:hover{color:var(--cr)}
+
+  /* ─── 記録ヘッダー ─── */
+  #recHeader{width:100%;max-width:380px;margin-bottom:10px}
+  .rec-hdr{display:flex;align-items:center;gap:8px}
+  .rt-label{
+    font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);
+    white-space:nowrap;
+  }
+  .unreg-badge{
+    font-size:10px;color:#f07050;
+    background:rgba(200,75,42,0.12);
+    border:1px solid rgba(200,75,42,0.3);
+    border-radius:4px;padding:2px 7px;white-space:nowrap;
+  }
+  .btn-bulk{
+    margin-left:auto;
+    background:var(--cb);border:1px solid var(--am);
+    border-radius:6px;color:var(--am);
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:600;
+    padding:5px 11px;cursor:pointer;transition:background .16s;white-space:nowrap;
+  }
+  .btn-bulk:hover:not(:disabled){background:var(--fm)}
+  .btn-bulk:disabled{border-color:var(--fl);color:var(--dim);cursor:default}
+
+  /* チェックボックス */
+  input[type=checkbox].log-cb,
+  #selectAllCb{
+    width:14px;height:14px;
+    accent-color:var(--am);
+    cursor:pointer;flex-shrink:0;
+  }
+  .cb-ph{width:14px;flex-shrink:0;display:inline-block}
+
+  /* ─── 記録リスト ─── */
+  #rl{width:100%;max-width:380px;display:flex;flex-direction:column;gap:7px}
   .ri{
     background:var(--cb);border:1px solid var(--fm);border-radius:8px;
     padding:9px 14px;display:flex;align-items:center;gap:10px;
     animation:si .3s ease;
   }
   .ri.partial{border-color:rgba(200,137,26,.4)}
+  .ri.registered{opacity:0.6}
   @keyframes si{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
   .rd{width:7px;height:7px;border-radius:50%;background:var(--am);flex-shrink:0}
   .rd.p{background:#6b9faf}
-  .rn{font-size:13px;font-weight:500;flex:1}
-  .rtm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);text-align:right}
-  .ric{font-size:13px;flex-shrink:0}
+  .rn{font-size:13px;font-weight:500;flex:1;min-width:0}
+  .rtm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);text-align:right;white-space:nowrap}
+  .ric{font-size:13px;flex-shrink:0;min-width:32px;text-align:right}
   .sp{display:inline-block;width:11px;height:11px;border:2px solid var(--dim);
       border-top-color:var(--al);border-radius:50%;animation:spin .75s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .empty{text-align:center;color:var(--dim);font-size:13px;padding:16px 0}
+  .btn-reg-one{
+    background:var(--cb);border:1px solid var(--am);
+    border-radius:5px;color:var(--am);
+    font-family:'Inter',sans-serif;font-size:10px;font-weight:600;
+    padding:4px 8px;cursor:pointer;white-space:nowrap;
+    transition:background .14s;
+  }
+  .btn-reg-one:hover{background:var(--fm)}
 
   /* ─── モーダル ─── */
   .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
@@ -242,7 +307,18 @@
 
 <div id="sb">タスクを選んでスタートしてください</div>
 <hr>
-<div class="rt">本日の記録</div>
+
+<!-- 未登録バナー（ログイン後に表示） -->
+<div id="unregBanner">
+  <span id="unregBannerText"></span>
+  <button class="btn-banner" onclick="registerAllUnregistered()">今すぐ登録</button>
+  <button class="btn-banner-cancel" onclick="document.getElementById('unregBanner').style.display='none'">後で</button>
+</div>
+
+<!-- 記録ヘッダー -->
+<div id="recHeader"></div>
+
+<!-- 記録リスト -->
 <div id="rl"><div class="empty">完了したセッションがここに表示されます</div></div>
 
 <!-- タスク追加モーダル -->
@@ -267,14 +343,16 @@
 const CIRC=2*Math.PI*98, WORK=25*60, BREAK=5*60, CD=30;
 const SCOPES='https://www.googleapis.com/auth/calendar.events';
 const CAL_BASE='https://www.googleapis.com/calendar/v3';
+const LOG_KEY='pomodoro_logs';
 
 let s={
   phase:'work',rem:WORK,running:false,done:0,
   bgmOn:false,cdActive:false,tid:null,sessionStart:null
 };
 let actx=null,bgmGain=null,bgmNodes=[],cdInt=null;
-let gToken=null; // Google OAuth アクセストークン
+let gToken=null;
 let clientId=localStorage.getItem('gcal_client_id')||'';
+let pendingRegIds=[];
 
 // ══════════════════════════════════════════
 //  DOM
@@ -300,9 +378,129 @@ const td=document.getElementById('td'),pl=document.getElementById('pl'),
       authStatus=document.getElementById('authStatus'),
       authDot=document.getElementById('authDot'),
       authLabel=document.getElementById('authLabel'),
-      btnAuth=document.getElementById('btnAuth');
+      btnAuth=document.getElementById('btnAuth'),
+      recHeader=document.getElementById('recHeader'),
+      unregBanner=document.getElementById('unregBanner'),
+      unregBannerText=document.getElementById('unregBannerText');
 
 rp.style.strokeDasharray=CIRC;
+
+// ══════════════════════════════════════════
+//  localStorage ログ管理
+// ══════════════════════════════════════════
+function todayStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getLogs(){
+  try{return JSON.parse(localStorage.getItem(LOG_KEY)||'[]');}catch(e){return[];}
+}
+function saveLogs(logs){localStorage.setItem(LOG_KEY,JSON.stringify(logs))}
+function getTodayLogs(){return getLogs().filter(l=>l.date===todayStr())}
+function updateLog(id,updates){
+  const logs=getLogs();
+  const idx=logs.findIndex(l=>l.id===id);
+  if(idx>=0){Object.assign(logs[idx],updates);saveLogs(logs);}
+}
+
+// ══════════════════════════════════════════
+//  記録レンダリング
+// ══════════════════════════════════════════
+function renderLogs(){
+  const logs=getTodayLogs().reverse();
+  const unregistered=logs.filter(l=>!l.registered);
+
+  // ヘッダー
+  if(logs.length===0){
+    recHeader.innerHTML='<div class="rec-hdr"><span class="rt-label">本日の記録</span></div>';
+    rl.innerHTML='<div class="empty">完了したセッションがここに表示されます</div>';
+    return;
+  }
+  const hasUnreg=unregistered.length>0;
+  recHeader.innerHTML=`
+    <div class="rec-hdr">
+      ${hasUnreg
+        ? `<input type="checkbox" id="selectAllCb" title="すべて選択" onchange="selectAllToggle(this.checked)">`
+        : '<span class="cb-ph"></span>'
+      }
+      <span class="rt-label">本日の記録</span>
+      ${hasUnreg ? `<span class="unreg-badge">未登録 ${unregistered.length}件</span>` : ''}
+      ${hasUnreg ? `<button class="btn-bulk" id="btnBulk" onclick="registerSelected()" disabled>選択して登録</button>` : ''}
+    </div>`;
+
+  // リスト
+  const pn=n=>String(n).padStart(2,'0');
+  const ft=ts=>{const d=new Date(ts);return `${pn(d.getHours())}:${pn(d.getMinutes())}`;};
+  rl.innerHTML=logs.map(log=>{
+    const elapsed=Math.round((log.end-log.start)/1000);
+    return `
+      <div class="ri${log.partial?' partial':''}${log.registered?' registered':''}" data-id="${log.id}">
+        ${!log.registered
+          ? `<input type="checkbox" class="log-cb" data-id="${log.id}" onchange="updateBulkBtn()">`
+          : '<span class="cb-ph"></span>'
+        }
+        <div class="rd${log.partial?' p':''}"></div>
+        <div class="rn">${log.task}${log.partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
+        <div class="rtm">${ft(log.start)}–${ft(log.end)}<br><span style="font-size:10px">${fmt(elapsed)}</span></div>
+        <div class="ric" id="${log.id}">
+          ${log.registered
+            ? '📅'
+            : `<button class="btn-reg-one" onclick="registerOne('${log.id}')">登録</button>`
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateBulkBtn(){
+  const checked=rl.querySelectorAll('.log-cb:checked').length;
+  const btn=document.getElementById('btnBulk');
+  if(btn)btn.disabled=checked===0;
+}
+
+function selectAllToggle(checked){
+  rl.querySelectorAll('.log-cb').forEach(cb=>cb.checked=checked);
+  updateBulkBtn();
+}
+
+// ══════════════════════════════════════════
+//  個別 / 一括登録
+// ══════════════════════════════════════════
+async function registerOne(logId){
+  if(!gToken){
+    pendingRegIds=[logId];
+    setSt('📅 Google にログインして記録を登録します','alert');
+    doAuth();
+    return;
+  }
+  await registerCal(logId);
+}
+
+async function registerSelected(){
+  const ids=[...rl.querySelectorAll('.log-cb:checked')].map(cb=>cb.dataset.id);
+  if(!ids.length)return;
+  if(!gToken){
+    pendingRegIds=ids;
+    setSt('📅 Google にログインして記録を登録します','alert');
+    doAuth();
+    return;
+  }
+  for(const id of ids)await registerCal(id);
+}
+
+async function registerAllUnregistered(){
+  unregBanner.style.display='none';
+  const logs=getTodayLogs().filter(l=>!l.registered);
+  for(const log of logs)await registerCal(log.id);
+}
+
+// ══════════════════════════════════════════
+//  ログイン後の未登録プロンプト
+// ══════════════════════════════════════════
+function showUnregisteredPrompt(count){
+  unregBannerText.textContent=`📋 未登録の記録が ${count}件 あります`;
+  unregBanner.style.display='flex';
+}
 
 // ══════════════════════════════════════════
 //  セットアップ・認証
@@ -313,6 +511,7 @@ function init(){
     setupPanel.classList.add('hidden');
     updateAuthUI();
   }
+  renderLogs();
 }
 
 btnSaveClientId.addEventListener('click',()=>{
@@ -353,85 +552,99 @@ function doAuth(){
     setupPanel.classList.remove('hidden');
     return;
   }
-  // Google Identity Services — Token モデル
   const client=google.accounts.oauth2.initTokenClient({
     client_id:clientId,
     scope:SCOPES,
-    callback:(resp)=>{
+    callback:async(resp)=>{
       if(resp.error){
         setSt('認証に失敗しました: '+resp.error,'alert');
         gToken=null;
-      } else {
-        gToken=resp.access_token;
-        // トークン有効期限に合わせてクリア（通常1時間）
-        setTimeout(()=>{gToken=null;updateAuthUI();},3500*1000);
-        setSt('✅ Google カレンダーに接続しました','ok');
+        pendingRegIds=[];
+        updateAuthUI();
+        return;
       }
+      gToken=resp.access_token;
+      setTimeout(()=>{gToken=null;updateAuthUI();},3500*1000);
+      setSt('✅ Google カレンダーに接続しました','ok');
       updateAuthUI();
+
+      if(pendingRegIds.length>0){
+        // 認証前に「登録」ボタンを押していた記録を登録
+        const ids=[...pendingRegIds];
+        pendingRegIds=[];
+        for(const id of ids)await registerCal(id);
+      } else {
+        // 未登録ログがあればバナーで促す
+        const unregCount=getTodayLogs().filter(l=>!l.registered).length;
+        if(unregCount>0)showUnregisteredPrompt(unregCount);
+      }
     }
   });
   client.requestAccessToken();
 }
 
 // ══════════════════════════════════════════
-//  Google Calendar API 直接呼び出し
+//  Google Calendar API
 // ══════════════════════════════════════════
-async function registerCal(task,start,end,partial){
-  const recId=`r_${start.getTime()}`;
+async function registerCal(logId){
+  const logs=getLogs();
+  const log=logs.find(l=>l.id===logId);
+  if(!log)return;
 
   if(!gToken){
-    setSt('⚠️ Google 認証が必要です。右上の「ログイン」を押してください','alert');
-    setRecIcon(recId,'⚠️');
+    setSt('⚠️ Google 認証が必要です','alert');
     return;
   }
 
-  const title=partial?`🍅⏹ ${task}（途中終了）`:`🍅 ${task}`;
-  const elapsed=Math.round((end-start)/1000);
-  const desc=partial
+  // スピナー表示
+  const ricEl=document.getElementById(logId);
+  if(ricEl)ricEl.innerHTML='<span class="sp"></span>';
+
+  const title=log.partial?`🍅⏹ ${log.task}（途中終了）`:`🍅 ${log.task}`;
+  const elapsed=Math.round((log.end-log.start)/1000);
+  const desc=log.partial
     ?`ポモドーロタイマー：途中終了\n経過時間: ${fmt(elapsed)}`
     :`ポモドーロタイマー：25分セッション完了`;
 
-  const p=n=>String(n).padStart(2,'0');
-  // Google Calendar API はタイムゾーン付きのISO8601を推奨
-  const toISO=d=>{
+  const pn=n=>String(n).padStart(2,'0');
+  const toISO=ts=>{
+    const d=new Date(ts);
     const off=-d.getTimezoneOffset();
     const sign=off>=0?'+':'-';
-    const hh=p(Math.floor(Math.abs(off)/60)),mm=p(Math.abs(off)%60);
-    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${sign}${hh}:${mm}`;
+    const hh=pn(Math.floor(Math.abs(off)/60)),mm=pn(Math.abs(off)%60);
+    return `${d.getFullYear()}-${pn(d.getMonth()+1)}-${pn(d.getDate())}T${pn(d.getHours())}:${pn(d.getMinutes())}:${pn(d.getSeconds())}${sign}${hh}:${mm}`;
   };
 
   const body={
     summary:title,
     description:desc,
-    start:{dateTime:toISO(start),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
-    end:  {dateTime:toISO(end),  timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
+    start:{dateTime:toISO(log.start),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
+    end:  {dateTime:toISO(log.end),  timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone},
   };
 
   try{
     const res=await fetch(`${CAL_BASE}/calendars/primary/events`,{
       method:'POST',
-      headers:{
-        'Authorization':`Bearer ${gToken}`,
-        'Content-Type':'application/json',
-      },
+      headers:{'Authorization':`Bearer ${gToken}`,'Content-Type':'application/json'},
       body:JSON.stringify(body)
     });
     if(res.status===401){
-      gToken=null; updateAuthUI();
+      gToken=null;updateAuthUI();
       setSt('⚠️ 認証が切れました。再ログインしてください','alert');
-      setRecIcon(recId,'⚠️');
+      renderLogs();
       return;
     }
     const data=await res.json();
     if(data.id){
-      setRecIcon(recId,'📅');
-      setSt(`✅ "${task}" をカレンダーに登録しました`,'ok');
+      updateLog(logId,{registered:true});
+      renderLogs();
+      setSt(`✅ "${log.task}" をカレンダーに登録しました`,'ok');
     } else {
-      setRecIcon(recId,'⚠️');
-      setSt('カレンダー登録に失敗しました（'+( data.error?.message||'不明')+')','alert');
+      if(ricEl)ricEl.innerHTML='⚠️';
+      setSt('カレンダー登録に失敗しました（'+(data.error?.message||'不明')+')','alert');
     }
   }catch(e){
-    setRecIcon(recId,'⚠️');
+    if(ricEl)ricEl.innerHTML='⚠️';
     setSt('カレンダー登録エラー: '+e.message,'alert');
   }
 }
@@ -558,6 +771,27 @@ function setSt(msg,cls=''){sb.textContent=msg;sb.className=cls}
 function showEndBtn(v){btnEnd.classList.toggle('show',v)}
 
 // ══════════════════════════════════════════
+//  記録追加（localStorage に保存）
+// ══════════════════════════════════════════
+function addRec(name,start,end,partial){
+  const id=`r_${start.getTime()}`;
+  const log={
+    id,
+    task:name,
+    start:start.getTime(),
+    end:end.getTime(),
+    partial,
+    registered:false,
+    date:todayStr()
+  };
+  const logs=getLogs();
+  logs.push(log);
+  saveLogs(logs);
+  renderLogs();
+  return id;
+}
+
+// ══════════════════════════════════════════
 //  タイマーコア
 // ══════════════════════════════════════════
 function tick(){
@@ -576,9 +810,13 @@ function tick(){
   if(s.phase==='work'){
     playEnd();s.done++;updatePips();
     const endT=new Date(),startT=new Date(endT-WORK*1000);
-    addRec(taskSel.value,startT,endT,false);
-    setSt('セッション完了！カレンダーに登録中...','ok');
-    registerCal(taskSel.value,startT,endT,false);
+    const logId=addRec(taskSel.value,startT,endT,false);
+    if(gToken){
+      setSt('セッション完了！カレンダーに登録中...','ok');
+      registerCal(logId);
+    } else {
+      setSt('セッション完了！ログに追加しました（ログインでカレンダーに登録できます）','ok');
+    }
     s.phase='break';s.rem=BREAK;s.cdActive=false;
     pl.textContent='休憩中';td.textContent=fmt(BREAK);updateRing();btnStart.textContent='▶ 休憩開始';
   } else {
@@ -599,34 +837,18 @@ function endPartial(){
   stopCdBeeps();td.classList.remove('pulsing');stopBgm(.5);showEndBtn(false);
   playPartial();
   const endT=new Date(),elapsed=WORK-s.rem,startT=new Date(endT-elapsed*1000);
-  addRec(taskSel.value,startT,endT,true);
-  setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');
-  registerCal(taskSel.value,startT,endT,true);
+  const logId=addRec(taskSel.value,startT,endT,true);
+  if(gToken){
+    setSt(`途中終了（${fmt(elapsed)}）をカレンダーに記録中...`,'ok');
+    registerCal(logId);
+  } else {
+    setSt(`途中終了（${fmt(elapsed)}）をログに追加しました（ログインでカレンダーに登録できます）`,'ok');
+  }
   Object.assign(s,{phase:'work',rem:WORK,running:false,cdActive:false,tid:null,sessionStart:null});
   td.textContent=fmt(WORK);td.style.color='var(--cr)';
   rp.style.stroke='#6b8f6b';rp.style.filter='drop-shadow(0 0 7px #6b8f6b)';rp.style.strokeDashoffset=0;
   pl.textContent='作業中';btnStart.textContent='▶ スタート';
 }
-
-// ══════════════════════════════════════════
-//  記録
-// ══════════════════════════════════════════
-function addRec(name,start,end,partial){
-  const emp=rl.querySelector('.empty');if(emp)emp.remove();
-  const p=n=>String(n).padStart(2,'0');
-  const ft=d=>`${p(d.getHours())}:${p(d.getMinutes())}`;
-  const elapsed=Math.round((end-start)/1000);
-  const id=`r_${start.getTime()}`;
-  const el=document.createElement('div');
-  el.className='ri'+(partial?' partial':'');
-  el.innerHTML=`
-    <div class="rd${partial?' p':''}"></div>
-    <div class="rn">${name}${partial?'<br><span style="font-size:10px;color:#6b9faf">途中終了</span>':''}</div>
-    <div class="rtm">${ft(start)}–${ft(end)}<br><span style="font-size:10px">${fmt(elapsed)}</span></div>
-    <div class="ric" id="${id}"><span class="sp"></span></div>`;
-  rl.prepend(el);
-}
-function setRecIcon(id,icon){const e=document.getElementById(id);if(e)e.innerHTML=icon}
 
 // ══════════════════════════════════════════
 //  ボタンイベント
